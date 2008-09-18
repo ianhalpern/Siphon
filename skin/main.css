@@ -1,0 +1,28 @@
+/* This is just an example. You shouldn't do this. */
+menuitem#syncons-hello {
+  color: red !important;
+}
+
+statusbarpanel #syncons-icon {
+  cursor: pointer;
+}
+
+richlistitem {
+  padding: 10px;
+}
+
+.addon_name {
+  font-weight: bold;
+}
+
+.invalid {
+  width: 12px;
+  height: 12px;
+  background: url(validate/invalid.png) no-repeat top left;
+}
+
+.valid {
+  width: 12px;
+  height: 12px;
+  background: url(validate/valid.png) no-repeat top left;
+}

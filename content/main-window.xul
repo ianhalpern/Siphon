@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://syncons/skin/main.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://syncons/locale/syncons.dtd">
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" 
+        title="&title.label;">
+	<script>
+	var win = Components.classes['@mozilla.org/appshell/window-mediator;1']
+	  .getService(Components.interfaces.nsIWindowMediator)
+	  .getMostRecentWindow('navigator:browser')
+	</script>
+	<hbox align="center" style="padding:10px">
+		<image src="chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png" />
+		<label value="&title.label;" style="font-weight: bold; font-size: 14px;"/>
+		<image id="throbber" style="display:none;" src="chrome://syncons/content/throbber/throbber.png" />
+	</hbox>
+	<richlistbox id="syncons_addon_listbox" style='overflow: auto; height: 300px;'>
+		<!--<richlistitem align="center" style="padding: 10px;">
+			<image src="chrome://firebug/content/firebug.png" />
+			<label class="addon-name" value="Firebug" style="font-weight: bold;" />
+			<label value="1.65" />
+			<spacer flex="1"/>
+			<button label="installed" disabled="true"/>
+			<button label="remove" oncommand="Syncons.onGetAddonCommand()"/>
+		</richlistitem>-->
+	</richlistbox>
+	<box align="center">
+	  <button label="Settings" oncommand="win.Syncons.onSettingsCommand()"/>
+	  <spacer flex="1"/>
+	  <button label="&close.label;" oncommand="window.close()"/>
+	</box>
+	<script>
+		window.addEventListener("load", function(e) {win.Syncons.onMainWindowLoad(e, window); }, false);
+		window.addEventListener("unload", function(e) {win.Syncons.onMainWindowUnload(e, window); }, false);
+	</script>
+</window>

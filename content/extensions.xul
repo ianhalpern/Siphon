@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE window SYSTEM "chrome://syncons/locale/syncons.dtd">
+<overlay id="syncons-extensions-overlay" 
+				 xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<script>
+var win = Components.classes['@mozilla.org/appshell/window-mediator;1']
+  .getService(Components.interfaces.nsIWindowMediator)
+  .getMostRecentWindow('navigator:browser')
+
+
+alert("hi")
+</script>
+</overlay>
+
