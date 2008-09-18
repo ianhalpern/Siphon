@@ -63,24 +63,18 @@ var SynconsSettings = {
 
 	setLogginSucceededUI: function() {
 		this.setLoggedInUI()
-		document.getElementById("loggin-status").setAttribute("value", "Login Succeeded")
-		setTimeout(function() {
-			document.getElementById("loggin-status").setAttribute("value", "")
-		}, 1000);
+		this.alertLoginStatus("Login Succeeded")
 	},
 
 	setLogginFailedUI: function() {
 		this.setModifyUI()
-		document.getElementById("loggin-status").setAttribute("value", "Login Failed")
-		setTimeout(function() {
-			document.getElementById("loggin-status").setAttribute("value", "")
-		}, 1000);
-
+		this.alertLoginStatus("Login Failed")
 	},
 
 	setSignUpSucceededUI: function() {
 		this.clearSignUpUI()
 		this.setSignedUpUI()
+		this.alertSignupStatus("Signup Successed")
 	},
 
 	setSignUpFailedUI: function() {
@@ -125,6 +119,21 @@ var SynconsSettings = {
 		document.getElementById("s-password").value = ""
 		document.getElementById("r-password").value = ""
 		document.getElementById("email").value = ""
+	},
+
+	alertLoginStatus: function (message) {
+		this.alertStatus("loggin-status", message)
+	},
+
+	alertSignupStatus: function (message) {
+		this.alertStatus("signup-status", message)
+	},
+
+	alertStatus: function (el_id, message) {
+		document.getElementById(el_id).setAttribute("value", message)
+		setTimeout(function() {
+			document.getElementById(el_id).setAttribute("value", "")
+		}, 1000);
 	},
 
 	validateLogInText: function() {
@@ -206,7 +215,8 @@ var SynconsSettings = {
 					SynconsSettings.tmp_password = ""
 					SynconsSettings.setLogginSucceededUI()
 				},
-				function(){SynconsSettings.setLogginFailedUI()})
+				function(){SynconsSettings.setLogginFailedUI()}
+			)
 		}
 	},
 

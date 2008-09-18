@@ -126,6 +126,7 @@
 					<hbox id="r-password-validate" class="invalid"></hbox>
 				</hbox>
 				<hbox align="center">
+					<label id="signup-status" value="" style="color:red;font-weight:bold;"/>
 					<spacer flex="1" />
 					<image id="throbber-sign-up" style="display:none;" src="chrome://syncons/content/throbber/throbber.png" />
 					<button id="sign-up-btn" label="Sign Up" disabled="true" oncommand="SynconsSettings.onSignUpCommand()"/>
