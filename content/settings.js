@@ -236,7 +236,7 @@ var SynconsSettings = {
 	},
 
 	onForgotCommand: function() {
-		
+		// TODO:
 	},
 
 	onSignUpChange: function() {
