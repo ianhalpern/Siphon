@@ -195,7 +195,7 @@ var SynconsSettings = {
 	},
 
 	onDialogClose: function(e) {
-	//	this.win.console.info(e)
+	// TODO:
 	},
 
 	onLogInKeyPress: function(e) {
