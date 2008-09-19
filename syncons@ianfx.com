@@ -1,1 +1,1 @@
-~/repo.git/Firefox Extensions/syncons
+~/Development/Firefox Extensions/syncons.bzr
