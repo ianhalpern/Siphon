@@ -155,6 +155,7 @@ var SynconsSettings = {
 
 	validateSignUpText: function() {
 		var n_valid = 0;
+
 		if (document.getElementById("s-username").value) {
 			n_valid++
 			document.getElementById("s-username-validate").className = 'valid'
