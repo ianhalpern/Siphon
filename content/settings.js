@@ -149,7 +149,6 @@ var SynconsSettings = {
 		 && this.win.Syncons.prefs.getCharPref("session")) {
 			return onSuccess()
 		}
-
 		this.win.Syncons.login(onSuccess, onFail)
 	},
 
