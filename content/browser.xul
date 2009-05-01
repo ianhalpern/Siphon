@@ -1,36 +1,36 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://syncons/skin/main.css" type="text/css"?>
-<!DOCTYPE window SYSTEM "chrome://syncons/locale/syncons.dtd">
-<overlay id="syncons-status-bar" 
+<?xml-stylesheet href="chrome://siphon/skin/main.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://siphon/locale/siphon.dtd">
+<overlay id="siphon-status-bar"
 				 xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-  <script src="Syncons.js"/>
+<script src="Siphon.js"/>
 
-  <statusbar id="status-bar">
-	<statusbarpanel>
-	  <box width="20" height="16" align="center" pack="center">
-		  <image id="syncons-icon" src="chrome://syncons/content/icons/default.png"
-								   context="syncons-contextmenu"
-								   onclick="Syncons.onStatusBarItemCommand(event)"
-								   />
-	  </box>
+	<!--<statusbar id="status-bar">
+		<statusbarpanel>
+			<box width="20" height="16" align="center" pack="center">
+				<image id="siphon-icon" src="chrome://siphon/content/icons/default.png"
+										 context="siphon-contextmenu"
+										 onclick="Siphon.onStatusBarItemCommand(event)"
+										 />
+			</box>
 
-	  <menupopup id="syncons-contextmenu" position="before_end"
-										  onpopupshowing=""
-										  oncommand="Syncons.onStatusBarMenuItemCommand(event.target.value)">
-		  <menuitem value="Sync" label="&menu.sync;"/>
-		  <menuitem value="Settings" label="&menu.settings;"/>
-		  <menuseparator/>
-		  <menuitem value="Website" label="&menu.website;"/>
-	  </menupopup>
-	</statusbarpanel>
-  </statusbar>
+			<menupopup id="siphon-contextmenu" position="before_end"
+												onpopupshowing=""
+												oncommand="Siphon.onStatusBarMenuItemCommand(event.target.value)">
+				<menuitem value="Sync" label="&menu.sync;"/>
+				<menuitem value="Settings" label="&menu.settings;"/>
+				<menuseparator/>
+				<menuitem value="Website" label="&menu.website;"/>
+			</menupopup>
+		</statusbarpanel>
+	</statusbar>
 
 
-  <menupopup id="menu_ToolsPopup">
-	<menuitem id="syncons-hello" label="&title.label;" 
-	  oncommand="Syncons.onMenuItemCommand(event);"/>
-  </menupopup>
+	<menupopup id="menu_ToolsPopup">
+		<menuitem id="siphon-hello" label="&title.label;"
+		oncommand="Siphon.onMenuItemCommand(event);"/>
+	</menupopup>-->
 
 </overlay>
 

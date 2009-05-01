@@ -97,13 +97,15 @@ var formattedDate = function() {
 	var month   = months[date.getMonth()]
 	var day     = date.getDate()
 	var hours   = date.getHours() > 12 ? date.getHours() - 12 :  date.getHours()
-	var minutes = date.getMinutes()
+	var minutes = "00" + date.getMinutes()
 	var daypart = date.getHours() >= 12 ? "pm" : "am"
+
+	minutes = minutes.substr( minutes.length - 2 )
 
 	return month+" "+day+", "+hours+":"+minutes+" "+daypart
 }
 
-var Syncons = {
+var Siphon = {
 
 	installed_addons: null,
 	uninstalled_addons: null,
@@ -113,11 +115,9 @@ var Syncons = {
 	app_OS: '',
 	app_ABI: '',
 	locale: '',
-	main_window: null,
 	addon_being_installed: null,
 	prefs: null,
-	username: null,
-	login_transport: null,
+	signup_transport: null,
 	sync_transport: null,
 
 	onLoad: function() {
@@ -140,11 +140,7 @@ var Syncons = {
 
 		var ext_prefs = prefs.getBranch("extensions.")
 		//alert(ext_prefs.getCharPref("enabledItems"))
-		this.prefs = prefs.getBranch("extensions.syncons.")
-
-		this.username = this.prefs.getCharPref("username")
-		this.session  = this.prefs.getCharPref("session")
-		this.no_sync  = this.prefs.getCharPref("no_sync").split(',')
+		this.prefs = prefs.getBranch("extensions.siphon.")
 
 		var locale_service = Components.classes["@mozilla.org/intl/nslocaleservice;1"]
 		  .getService(Components.interfaces.nsILocaleService);
@@ -161,12 +157,11 @@ var Syncons = {
 		this.synchronize()
 
 		// clears tmp preferences
-		this.clearTempPrefs()
 		// https://versioncheck.addons.mozilla.org/update/VersionCheck.php?reqVersion=1&id=yslow@yahoo-inc.com&version=0.9.5b2&maxAppVersion=3.0.*&status=userDisabled&appID={ec8030f7-c20a-464f-9b0e-13a3a9e97384}&appVersion=3.0.1&appOS=WINNT&appABI=x86-msvc&locale=en-US
 
 		if (this.prefs.getBoolPref("first_run")) {
 			this.prefs.setBoolPref("first_run", false)
-			this.onSettingsCommand()
+			//this.onSettingsCommand()
 		}
 
 	},
@@ -188,7 +183,6 @@ var Syncons = {
 	},
 
 	onMenuItemCommand: function() {
-		this.openMainWindow()
 	},
 
 	onSettingsCommand: function() {
@@ -197,7 +191,7 @@ var Syncons = {
 
 	openSettingsDialog: function() {
 		var features = "chrome,titlebar,toolbar,centerscreen,modal,width=350, height=400";
-		window.openDialog("chrome://syncons/content/settings.xul", "Preferences", features);
+		window.openDialog("chrome://siphon/content/settings.xul", "Preferences", features);
 	},
 
 	onGetAddonCommand: function(guid) {
@@ -210,7 +204,7 @@ var Syncons = {
 		this.addon_being_installed = addon
 
 		var url = 'https://versioncheck.addons.mozilla.org/update/VersionCheck.php?'
-			+"reqVersion="+addon.minAppVersion
+			+"reqVersion=3.0"
 			+"&id="+addon.id
 			+"&version="+addon.version
 			+"&maxAppVersion="+addon.maxAppVersion
@@ -218,7 +212,7 @@ var Syncons = {
 			+"&appID="+this.app_id
 			+"&appVersion="+this.app_version
 			+"&appOS="+this.app_OS
-			+"&appABgnome remove dotten button I="+this.app_ABI
+			+"&appABI="+this.app_ABI
 			+"&locale="+this.locale
 
 		Ajax.Request( url, function(rdf_xml) {
@@ -244,7 +238,7 @@ var Syncons = {
 	},
 
 	openMainWindow: function() {
-		window.open("chrome://syncons/content/main-window.xul", "", "chrome,titlebar,toolbar,centerscreen,modal,width=647, height=400")
+	//	window.open("chrome://siphon/content/main-window.xul", "", "chrome,titlebar,toolbar,centerscreen,modal,width=647, height=400")
 	},
 
 	onMainWindowLoad: function(e, win) {
@@ -258,7 +252,7 @@ var Syncons = {
 		this.main_window.document.getElementById('throbber').style.display = "none"
 		for (var i=0; i<this.uninstalled_addons.length; i++) {
 			if (!this.main_window.document.getElementById(this.uninstalled_addons[i].id)) {
-				this.main_window.document.getElementById('syncons_addon_listbox').appendChild(
+				this.main_window.document.getElementById('siphon_addon_listbox').appendChild(
 				  this.createAddonListItem (
 					this.uninstalled_addons[i].name,
 					this.uninstalled_addons[i].version,
@@ -272,7 +266,7 @@ var Syncons = {
 
 		for (var i=0; i<this.installed_addons.length; i++) {
 			if (!this.main_window.document.getElementById(this.installed_addons[i].id)) {
-				this.main_window.document.getElementById('syncons_addon_listbox').appendChild(
+				this.main_window.document.getElementById('siphon_addon_listbox').appendChild(
 				  this.createAddonListItem (
 					this.installed_addons[i].name,
 					this.installed_addons[i].version,
@@ -322,13 +316,13 @@ var Syncons = {
 		else install_btn.addEventListener("command", function(e) {
 			install_btn.setAttribute("disabled", "true")
 			install_btn.setAttribute("label", "adding")
-			Syncons.onGetAddonCommand(guid)
+			Siphon.onGetAddonCommand(guid)
 		}, false)
 		list_item.appendChild(install_btn)
 
 		var no_sync_chkbox = document.createElement('checkbox')
 		no_sync_chkbox.setAttribute("label", "Do not Sync")
-		no_sync_chkbox.addEventListener("command", function(e) {Syncons.onRemoveAddonCommand(guid)}, false)
+		no_sync_chkbox.addEventListener("command", function(e) {Siphon.onRemoveAddonCommand(guid)}, false)
 		list_item.appendChild(no_sync_chkbox)
 
 		if (!is_installed)
@@ -339,7 +333,7 @@ var Syncons = {
 			<label value="1.65" />
 			<spacer flex="1"/>
 			<button label="installed" disabled="true"/>
-			<button label="remove" oncommand="Syncons.onGetAddonCommand()"/>
+			<button label="remove" oncommand="Siphon.onGetAddonCommand()"/>
 		</richlistitem>
 	*/
 		return list_item
@@ -356,14 +350,14 @@ var Syncons = {
 				el.childNodes[4].setAttribute("disabled", "false")
 				el.childNodes[5].setAttribute("disabled", "false")
 
-				Syncons.installed_addons.unshift(addon_being_installed)
-				for (var i=0; i<Syncons.uninstalled_addons.length; i++) {
-					if (Syncons.uninstalled_addons[i] == addon_being_installed) {
-						Syncons.main_window.document.getElementById('syncons_addon_listbox').insertBefore(el,
-						Syncons.main_window.document.getElementById('syncons_addon_listbox').childNodes[
-							Syncons.uninstalled_addons.length
+				Siphon.installed_addons.unshift(addon_being_installed)
+				for (var i=0; i<Siphon.uninstalled_addons.length; i++) {
+					if (Siphon.uninstalled_addons[i] == addon_being_installed) {
+						Siphon.main_window.document.getElementById('siphon_addon_listbox').insertBefore(el,
+						Siphon.main_window.document.getElementById('siphon_addon_listbox').childNodes[
+							Siphon.uninstalled_addons.length
 						])
-						Syncons.uninstalled_addons.splice(i,1)
+						Siphon.uninstalled_addons.splice(i,1)
 						break
 					}
 				}
@@ -376,7 +370,7 @@ var Syncons = {
 		} else {
 			var dialog = win.document.getElementById('xpinstallConfirm')
 			dialog.addEventListener("dialogaccept", function(e) {
-			//	Syncons.syncAddonListWithServer()
+			//	Siphon.syncAddonListWithServer()
 			}, false)
 
 			dialog.addEventListener("dialogcancel", function(e) {
@@ -385,81 +379,98 @@ var Syncons = {
 		}
 	},
 
-	createTempPrefs: function() {
-		this.prefs.setCharPref("tmp_password", "")
+	signup: function( email, password, onSuccess, onFail) {
+		this.signup_transport = Ajax.Request("http://siphon.ian-halpern.com/update", function(json_str) {
+			Siphon.signup_transport = null
 
-		if (this.prefs.getCharPref("session") && this.prefs.getCharPref("username"))
-			this.prefs.setCharPref("tmp_password", "••••••••••••••")
-		this.prefs.setCharPref("tmp_s_username", "")
-		this.prefs.setCharPref("tmp_s_password", "")
-		this.prefs.setCharPref("tmp_s_re_password", "")
-		this.prefs.setCharPref("tmp_s_email", "")
-	},
+			var json = eval('('+json_str+')')
 
-	clearTempPrefs: function() {
-		if (this.prefs.getPrefType  ("tmp_password"))
-			this.prefs.clearUserPref("tmp_password")
-		if (this.prefs.getPrefType  ("tmp_s_username"))
-			this.prefs.clearUserPref("tmp_s_username")
-		if (this.prefs.getPrefType  ("tmp_s_password"))
-			this.prefs.clearUserPref("tmp_s_password")
-		if (this.prefs.getPrefType  ("tmp_s_re_password"))
-			this.prefs.clearUserPref("tmp_s_re_password")
-		if (this.prefs.getPrefType  ("tmp_s_email"))
-			this.prefs.clearUserPref("tmp_s_email")
-//		this.prefs.deleteBranch()
-	},
-
-	login: function(onSuccess, onFail) {
-		this.login_transport = Ajax.Request("http://syncons.com/login", function(json_str) {
-			Syncons.login_transport = null
-
-			var login = eval('('+json_str+')')
-			if (login.session) {
-				Syncons.prefs.setCharPref("session", login.session)
+			if ( json.retval > 0 ) {
 				onSuccess()
 			} else {
 				onFail()
 			}
 		},{
-			params: "username="  + this.prefs.getCharPref("username") +
-					"&password=" + this.prefs.getCharPref("tmp_password") +
-					"&rand="     + new Date().getTime()
+			params: "type=signup" +
+					"&email="     + escape( email ) +
+					"&password="  + escape( password ) +
+					"&rand="      + new Date().getTime( )
 		});
 	},
 
-	abortLogin: function() {
-		this.login_transport.abort()
-		this.login_transport = null
+	abortSignup: function() {
+		this.signup_transport.abort( )
+		this.signup_transport = null
 	},
 
-	synchronize: function(onFinish) {
+	synchronize: function( onSuccess, onFail ) {
 	//	alert(JSON.toString(this.installed_addons))
 	//	alert("addons="+escape(JSON.toString(this.installed_addons))+"&rand="+new Date().getTime()+
 	//			    "&S=83c86910038194b86cb4416d185365298e201dd3")
-	//
+
 		this.em = Components.classes["@mozilla.org/extensions/manager;1"]
 		  .getService(Components.interfaces.nsIExtensionManager)
-		this.installed_addons = this.em.getItemList(2, [])
-		this.uninstalled_addons = []
 
-		if (this.main_window) this.mainWindowWaiting()
+		var installed_addons = this.em.getItemList(2, [])
+		var synced_list = this.prefs.getCharPref( "synced_list" ).split( "," )
 
-		this.sync_transport = Ajax.Request("http://syncons.com/sync", function(json_str) {
-			Syncons.sync_transport = null
-			Syncons.prefs.setCharPref("last_sync", formattedDate())
+		this.sync_transport = Ajax.Request("http://siphon.ian-halpern.com/update", function(json_str) {
+			Siphon.sync_transport = null
 
-			if (typeof onFinish == "function") onFinish()
+
+			var json = eval('('+json_str+')')
+			if ( json.retval > 0 ) {
+				try {
+
+					Siphon.prefs.setCharPref( "last_sync", formattedDate( ) )
+
+					var synced_list = [ ]
+
+					for ( var i = 0; i < installed_addons.length; i++ ) {
+						var found = false
+						for ( var j = 0; j < json.addons.del.length; j++ ) {
+							if ( found = ( installed_addons[ i ].id == json.addons.del[ j ] ) ) break
+						}
+						if ( ! found ) synced_list.push( installed_addons[ i ].id )
+					}
+
+					Siphon.prefs.setCharPref( "synced_list", synced_list.join( "," ) )
+
+					if ( onSuccess ) onSuccess( )
+
+					Siphon.uninstalled_addons = json.addons.ins
+
+					for ( var i = 0; i < Siphon.uninstalled_addons.length; i++ ) {
+						alert( "Install " + Siphon.uninstalled_addons[ i ].id )
+						Siphon.onGetAddonCommand( Siphon.uninstalled_addons[ i ].id )
+					}
+
+					for ( var i = 0; i < json.addons.del.length; i++ )
+						alert( "Delete " + json.addons.del[ i ] )
+				} catch ( e ) {
+					alert( e )
+				}
+			} else {
+				onFail( json.retval )
+			}
+			/*if (typeof onFinish == "function") onFinish()
 
 			try {
-				Syncons.uninstalled_addons = eval(json_str)
+				Siphon.uninstalled_addons = eval(json_str)
 			} catch (e) {}
 
-			if (Syncons.main_window)
-				Syncons.mainWindowReady()
+			if (Siphon.main_window)
+				Siphon.mainWindowReady()*/
+
 		}, {
-			params: "addons="+escape(JSON.toString(this.installed_addons))+"&rand="+new Date().getTime()+
-				    "&S="+this.prefs.getCharPref("session")
+			//params: "addons="+escape(JSON.toString(this.installed_addons))+"&rand="+new Date().getTime()+
+			//	    "&S="+this.prefs.getCharPref("session")
+			params: "type=sync"  +
+					"&email="    + escape( this.prefs.getCharPref( "email" ) ) +
+					"&password=" + escape( this.prefs.getCharPref( "password" ) ) +
+					"&installed_list=" + escape( JSON.toString( installed_addons) ) +
+					"&synced_list="    + escape( JSON.toString( synced_list ) ) +
+					"&rand="     + new Date().getTime( )
 		})
 	},
 
@@ -473,4 +484,4 @@ var Syncons = {
 
 }
 
-window.addEventListener("load", function(e) { Syncons.onLoad(e); }, false);
+window.addEventListener("load", function(e) { Siphon.onLoad(e); }, false);

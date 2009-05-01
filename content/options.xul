@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
+<?xml-stylesheet href="chrome://siphon/skin/main.css"?>
+
+<!DOCTYPE prefwindow SYSTEM "chrome://siphon/locale/siphon.dtd">
+
+<prefwindow type="prefwindow"
+            id="BrowserPreferences"
+            windowtype="Browser:Preferences"
+            ondialoghelp=""
+            ondialogcancel="SiphonSettings.onDialogClose(event)"
+            title="Siphon Settings"
+            xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+            style="">
+
+	<script src="options.js" />
+
+	<script>
+
+	var win = Components.classes['@mozilla.org/appshell/window-mediator;1']
+	  .getService(Components.interfaces.nsIWindowMediator)
+	  .getMostRecentWindow('navigator:browser')
+
+	window.addEventListener("load", function( ){
+		SiphonSettings.init(win)
+	}, false)
+
+	</script>
+
+	<prefpane id="paneMain" label="General">
+		<preferences>
+			<preference id="pref-email"    name="extensions.siphon.email"    type="string" />
+			<preference id="pref-password" name="extensions.siphon.password" type="string" />
+		</preferences>
+
+		<groupbox>
+			<caption label="Account" />
+
+			<vbox>
+				<groupbox>
+					<hbox> <label id="loggin-status" value="" style="color:red;font-weight:bold;"/></hbox>
+					<hbox align="center">
+						<label control="l-email" value="Email:"/>
+						<spacer flex="1" />
+						<textbox id="l-email" preference="pref-email" />
+					</hbox>
+					<hbox align="center">
+						<label control="l-password" value="Password:"/>
+						<spacer flex="1" />
+						<textbox id="l-password" type="password" preference="pref-password" />
+					</hbox>
+				</groupbox>
+
+				<separator />
+				<hbox align="center">
+					<label value="Last Sync:"/>
+					<label id="last-sync" value=""/>
+					<spacer flex="1" />
+					<image id="throbber" style="display:none;" src="chrome://siphon/content/throbber/throbber.png" />
+					<spacer flex="1" />
+					<button id="sync-btn" label="Synchronize" oncommand="SiphonSettings.onSyncCommand()"/>
+					<button id="sync-stop-btn" style="display:none;" label="Stop"
+						oncommand="SiphonSettings.onSyncStopCommand()"/>
+				</hbox>
+				<separator />
+				<button label="Forgot Username or Password" />
+			</vbox>
+		</groupbox>
+	</prefpane>
+
+
+    <prefpane id="paneSecurity" label="Sign up">
+
+		<groupbox id="startupGroup">
+			<caption label="Sign Up"/>
+
+			<vbox>
+				<hbox align="center">
+					<label control="s-email" value="Email:"/>
+					<spacer flex="1" />
+					<textbox id="s-email" onchange="SiphonSettings.onSignUpChange()"
+					oninput="SiphonSettings.onSignUpChange()"/>
+					<hbox id="s-email-validate" class="invalid"></hbox>
+				</hbox>
+				<hbox align="center">
+					<label control="s-password" value="Password:"/>
+					<spacer flex="1" />
+					<textbox id="s-password" type="password"
+					onchange="SiphonSettings.onSignUpChange()"
+					oninput="SiphonSettings.onSignUpChange()"/>
+					<hbox id="s-password-validate" class="invalid"></hbox>
+				</hbox>
+				<hbox align="center">
+					<label control="r-password" value="Retype Password:"/>
+					<spacer flex="1" />
+					<textbox id="r-password" type="password" onchange="SiphonSettings.onSignUpChange()"
+					oninput="SiphonSettings.onSignUpChange()"/>
+					<hbox id="r-password-validate" class="invalid"></hbox>
+				</hbox>
+				<hbox align="center">
+					<label id="signup-status" value="" style="color:red;font-weight:bold;"/>
+					<spacer flex="1" />
+					<image id="throbber-sign-up" style="display:none;" src="chrome://siphon/content/throbber/throbber.png" />
+					<button id="sign-up-btn" label="Sign Up" disabled="true" oncommand="SiphonSettings.onSignUpCommand()"/>
+					<button id="stop-sign-up-btn" label="Stop" style="display:none;" oncommand="SiphonSettings.onSignUpStopCommand()"/>
+				</hbox>
+			</vbox>
+		</groupbox>
+	</prefpane>
+</prefwindow>
+
