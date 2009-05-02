@@ -5,7 +5,6 @@
 				 xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 <script src="Siphon.js"/>
-
 	<!--<statusbar id="status-bar">
 		<statusbarpanel>
 			<box width="20" height="16" align="center" pack="center">

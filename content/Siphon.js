@@ -127,12 +127,9 @@ var Siphon = {
 	//	this.nativeJSON =  Components.classes["@mozilla.org/dom/json;1"]
 	//	  .createInstance(Components.interfaces.nsIJSON)
 
-	//	var str = ""
-	//	for (var x in this.installed_addons[3]) {
-	//		str += x+"; "
-	//	}
-	//	alert(str)
-	//	alert(this.installed_addons.length)
+
+		this.em = Components.classes["@mozilla.org/extensions/manager;1"]
+		  .getService(Components.interfaces.nsIExtensionManager)
 
 		// Get the "extensions.myext." branch
 		var prefs = Components.classes["@mozilla.org/preferences-service;1"]
@@ -161,7 +158,7 @@ var Siphon = {
 
 		if (this.prefs.getBoolPref("first_run")) {
 			this.prefs.setBoolPref("first_run", false)
-			//this.onSettingsCommand()
+			this.onSettingsCommand( )
 		}
 
 	},
@@ -179,7 +176,6 @@ var Siphon = {
 	},
 
 	onStatusBarMenuItemCommand: function(action) {
-	
 	},
 
 	onMenuItemCommand: function() {
@@ -191,7 +187,7 @@ var Siphon = {
 
 	openSettingsDialog: function() {
 		var features = "chrome,titlebar,toolbar,centerscreen,modal,width=350, height=400";
-		window.openDialog("chrome://siphon/content/settings.xul", "Preferences", features);
+		window.openDialog("chrome://siphon/content/options.xul", "Preferences", features);
 	},
 
 	onGetAddonCommand: function(guid) {
@@ -204,7 +200,7 @@ var Siphon = {
 		this.addon_being_installed = addon
 
 		var url = 'https://versioncheck.addons.mozilla.org/update/VersionCheck.php?'
-			+"reqVersion=3.0"
+			+"reqVersion="+addon.minAppVersion
 			+"&id="+addon.id
 			+"&version="+addon.version
 			+"&maxAppVersion="+addon.maxAppVersion
@@ -228,12 +224,13 @@ var Siphon = {
 			  .getService(Components.interfaces.nsIWindowMediator)
 			  .getMostRecentWindow('navigator:browser');
 
-			win.openUILinkIn(xpi_url, 'current');
+			//win.openUILinkIn("https://addons.mozilla.org/en-US/firefox/downloads/latest/5791/addon-5791-latest.xpi", 'current');
+			win.openUILinkIn( xpi_url, 'current');
 		})
 
 	},
 
-	onRemoveAddonCommand: function(guid) {
+	/*onRemoveAddonCommand: function(guid) {
 		alert(guid)
 	},
 
@@ -327,19 +324,19 @@ var Siphon = {
 
 		if (!is_installed)
 			no_sync_chkbox.setAttribute("disabled", "true")
-	/*	<richlistitem align="center" style="padding: 10px;">
-			<image src="chrome://firebug/content/firebug.png" />
-			<label value="Firebug" style="font-weight: bold;" />
-			<label value="1.65" />
-			<spacer flex="1"/>
-			<button label="installed" disabled="true"/>
-			<button label="remove" oncommand="Siphon.onGetAddonCommand()"/>
-		</richlistitem>
-	*/
-		return list_item
-	},
+	//	<richlistitem align="center" style="padding: 10px;">
+	//		<image src="chrome://firebug/content/firebug.png" />
+	//		<label value="Firebug" style="font-weight: bold;" />
+	//		<label value="1.65" />
+	//		<spacer flex="1"/>
+	//		<button label="installed" disabled="true"/>
+	//		<button label="remove" oncommand="Siphon.onGetAddonCommand()"/>
+	//	</richlistitem>
 
-	onXpinstallConfirmLoad: function(e, win) {
+		return list_item
+	},*/
+
+	/*onXpinstallConfirmLoad: function(e, win) {
 		if (this.main_window) {
 			var addon_being_installed = this.addon_being_installed
 			var el = this.main_window.document.getElementById(addon_being_installed.id)
@@ -377,7 +374,7 @@ var Siphon = {
 				// Do Nothing
 			}, false)
 		}
-	},
+	},*/
 
 	signup: function( email, password, onSuccess, onFail) {
 		this.signup_transport = Ajax.Request("http://siphon.ian-halpern.com/update", function(json_str) {
@@ -404,12 +401,6 @@ var Siphon = {
 	},
 
 	synchronize: function( onSuccess, onFail ) {
-	//	alert(JSON.toString(this.installed_addons))
-	//	alert("addons="+escape(JSON.toString(this.installed_addons))+"&rand="+new Date().getTime()+
-	//			    "&S=83c86910038194b86cb4416d185365298e201dd3")
-
-		this.em = Components.classes["@mozilla.org/extensions/manager;1"]
-		  .getService(Components.interfaces.nsIExtensionManager)
 
 		var installed_addons = this.em.getItemList(2, [])
 		var synced_list = this.prefs.getCharPref( "synced_list" ).split( "," )
@@ -420,51 +411,40 @@ var Siphon = {
 
 			var json = eval('('+json_str+')')
 			if ( json.retval > 0 ) {
-				try {
 
-					Siphon.prefs.setCharPref( "last_sync", formattedDate( ) )
+				Siphon.prefs.setCharPref( "last_sync", formattedDate( ) )
 
-					var synced_list = [ ]
+				var synced_list = [ ]
 
-					for ( var i = 0; i < installed_addons.length; i++ ) {
-						var found = false
-						for ( var j = 0; j < json.addons.del.length; j++ ) {
-							if ( found = ( installed_addons[ i ].id == json.addons.del[ j ] ) ) break
-						}
-						if ( ! found ) synced_list.push( installed_addons[ i ].id )
+				for ( var i = 0; i < installed_addons.length; i++ ) {
+					var found = false
+					for ( var j = 0; j < json.addons.del.length; j++ ) {
+						if ( found = ( installed_addons[ i ].id == json.addons.del[ j ] ) ) break
 					}
+					if ( ! found ) synced_list.push( installed_addons[ i ].id )
+				}
 
-					Siphon.prefs.setCharPref( "synced_list", synced_list.join( "," ) )
+				Siphon.prefs.setCharPref( "synced_list", synced_list.join( "," ) )
 
-					if ( onSuccess ) onSuccess( )
+				if ( onSuccess ) onSuccess( )
 
-					Siphon.uninstalled_addons = json.addons.ins
+				Siphon.uninstalled_addons = json.addons.ins
 
-					for ( var i = 0; i < Siphon.uninstalled_addons.length; i++ ) {
-						alert( "Install " + Siphon.uninstalled_addons[ i ].id )
-						Siphon.onGetAddonCommand( Siphon.uninstalled_addons[ i ].id )
-					}
+				for ( var i = 0; i < Siphon.uninstalled_addons.length; i++ ) {
+					alert( "Install " + Siphon.uninstalled_addons[ i ].id )
+					Siphon.onGetAddonCommand( Siphon.uninstalled_addons[ i ].id )
+				}
 
-					for ( var i = 0; i < json.addons.del.length; i++ )
-						alert( "Delete " + json.addons.del[ i ] )
-				} catch ( e ) {
-					alert( e )
+				for ( var i = 0; i < json.addons.del.length; i++ ) {
+					alert( "Delete " + json.addons.del[ i ] )
+					Siphon.em.uninstallItem( json.addons.del[ i ] )
+					//alert( Siphon.em.uninstallItem )
 				}
 			} else {
 				onFail( json.retval )
 			}
-			/*if (typeof onFinish == "function") onFinish()
-
-			try {
-				Siphon.uninstalled_addons = eval(json_str)
-			} catch (e) {}
-
-			if (Siphon.main_window)
-				Siphon.mainWindowReady()*/
 
 		}, {
-			//params: "addons="+escape(JSON.toString(this.installed_addons))+"&rand="+new Date().getTime()+
-			//	    "&S="+this.prefs.getCharPref("session")
 			params: "type=sync"  +
 					"&email="    + escape( this.prefs.getCharPref( "email" ) ) +
 					"&password=" + escape( this.prefs.getCharPref( "password" ) ) +
@@ -484,4 +464,4 @@ var Siphon = {
 
 }
 
-window.addEventListener("load", function(e) { Siphon.onLoad(e); }, false);
+window.addEventListener( "load", function( e ) { Siphon.onLoad( e ) }, false )
