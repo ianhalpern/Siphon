@@ -5,9 +5,9 @@
 	<Description about="urn:mozilla:install-manifest">
 
 		<em:id>siphon@siphon.ian-halpern.com</em:id>
-		<em:name>Siphon Add-on Synchronizer</em:name>
-		<em:version>1.0</em:version>
-		<em:description>Keep your favorite Add-ons synced with all your computers.</em:description>
+		<em:name>Siphon Extension Synchronizer</em:name>
+		<em:version>0.0.10</em:version>
+		<em:description>Keep your favorite Extensions synced with all your computers.</em:description>
 		<em:creator>Ian Halpern</em:creator>
 		<!-- optional items
 		<em:contributor>A person who helped you</em:contributor>
