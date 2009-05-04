@@ -9,8 +9,7 @@ AUTHOR  = "Ian Halpern"
 WEBSITE = "http://siphon.ian-halpern.com"
 
 
-rdf = """
-<?xml version="1.0"?>
+rdf = """<?xml version="1.0"?>
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
      xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
@@ -43,7 +42,6 @@ rdf = """
 
 	</Description>
 
-</RDF>
-""" % ( ID, NAME, VERSION, DESC, AUTHOR, WEBSITE )
+</RDF>""" % ( ID, NAME, VERSION, DESC, AUTHOR, WEBSITE )
 
 open( "install.rdf", "w" ).write( rdf )
