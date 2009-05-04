@@ -4,13 +4,23 @@ XTRA_FILES=README COPYING
 BUILD_DIR=build
 NAME=`bzr nick`
 VERNUM=`vernum`
-FNAME=$(NAME)-$(VERNUM)
+FNAME="$(NAME)-$(VERNUM)"
+
+VERNUM_QA=`vernum 1`
+FNAME_QA="$(NAME)-$(VERNUM_QA)-qa"
 
 make:
 	mkdir -p $(BUILD_DIR)/$(FNAME)
-	cp -r $(REQ_FILES) $(REQ_DIRS) $(XTRA_FILES) $(BUILD_DIR)/$(FNAME)
+	bzr export $(BUILD_DIR)/$(FNAME)-export
+	cd $(BUILD_DIR)/$(FNAME)-export && cp -r $(REQ_FILES) $(REQ_DIRS) $(XTRA_FILES) ../$(FNAME)
 	cd $(BUILD_DIR)/$(FNAME) && zip -r ../$(FNAME).zip *
 	mv $(BUILD_DIR)/$(FNAME).zip $(BUILD_DIR)/$(FNAME).xpi
 
+qa:
+	mkdir -p $(BUILD_DIR)/$(FNAME_QA)
+	cp -r $(REQ_FILES) $(REQ_DIRS) $(XTRA_FILES) $(BUILD_DIR)/$(FNAME_QA)
+	cd $(BUILD_DIR)/$(FNAME_QA) && zip -r ../$(FNAME_QA).zip *
+	mv $(BUILD_DIR)/$(FNAME_QA).zip $(BUILD_DIR)/$(FNAME_QA).xpi
+
 clean:
-	rm -rf build
+	rm -rf $(BUILD_DIR)

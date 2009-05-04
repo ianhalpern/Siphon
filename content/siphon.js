@@ -211,10 +211,21 @@ else {
 			// https://versioncheck.addons.mozilla.org/update/VersionCheck.php?reqVersion=1&id=yslow@yahoo-inc.com&version=0.9.5b2&maxAppVersion=3.0.*&status=userDisabled&appID={ec8030f7-c20a-464f-9b0e-13a3a9e97384}&appVersion=3.0.1&appOS=WINNT&appABI=x86-msvc&locale=en-US
 
 			if ( this.prefs.getBoolPref( "first_run" ) ) {
-				this.prefs.setBoolPref( "first_run", false )
+				this.unsetFirstRun( )
 				this.onSettingsCommand( )
 			}
 
+		},
+
+		unsetFirstRun: function ( ) {
+			this.prefs.setBoolPref( "first_run", false )
+		},
+
+		resetPrefs: function ( ) {
+			var list = this.prefs.getChildList( "", [ ] )
+			for ( var i = 0; i < list.length; i++ ) {
+				try { this.prefs.clearUserPref( list[ i ] ) } catch( e ) {}
+			}
 		},
 
 		onStatusBarItemCommand: function( event ) {
