@@ -1,35 +1,60 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://siphon/skin/main.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://siphon/locale/siphon.dtd">
-<overlay id="siphon-status-bar"
-				 xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-<script src="Siphon.js"/>
-	<!--<statusbar id="status-bar">
+<!--
+
+   Copyright (c) 2009 Ian Halpern
+   http://siphon.ian-halpern.com
+
+   This file is part of Siphon.
+
+   Siphon is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   Siphon is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Siphon.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<overlay id="siphon-status-bar"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+	<script src="siphon.js" />
+
+	<statusbar id="status-bar">
 		<statusbarpanel>
-			<box width="20" height="16" align="center" pack="center">
-				<image id="siphon-icon" src="chrome://siphon/content/icons/default.png"
-										 context="siphon-contextmenu"
-										 onclick="Siphon.onStatusBarItemCommand(event)"
-										 />
+			<box id="siphon-statusbar" width="20" height="20" align="center" pack="center">
+					<label id="siphon-statusbar-num"
+						 context="siphon-contextmenu"
+						 onclick="Siphon.onStatusBarItemCommand(event)"
+					/>
 			</box>
 
 			<menupopup id="siphon-contextmenu" position="before_end"
 												onpopupshowing=""
 												oncommand="Siphon.onStatusBarMenuItemCommand(event.target.value)">
-				<menuitem value="Sync" label="&menu.sync;"/>
-				<menuitem value="Settings" label="&menu.settings;"/>
-				<menuseparator/>
-				<menuitem value="Website" label="&menu.website;"/>
+				<menuitem value="sync" label="&menu.sync;"/>
+				<menuitem value="settings" label="&menu.settings;"/>
+				<!--<menuseparator/>
+				<menuitem value="Website" label="&menu.website;"/>-->
 			</menupopup>
 		</statusbarpanel>
 	</statusbar>
 
 
-	<menupopup id="menu_ToolsPopup">
+	<!--<menupopup id="menu_ToolsPopup">
 		<menuitem id="siphon-hello" label="&title.label;"
 		oncommand="Siphon.onMenuItemCommand(event);"/>
 	</menupopup>-->
+
 
 </overlay>
 

@@ -1,6 +1,16 @@
-<!ENTITY title.label "Sync Add-ons">
-<!ENTITY close.label "Close">
+<!ENTITY options.title "Siphon - Settings">
+<!ENTITY options.panemain.title "Settings">
+<!ENTITY options.panemain.caption "Account">
+<!ENTITY options.panemain.email "Email">
+<!ENTITY options.panemain.password "Password">
+<!ENTITY options.panemain.last_sync "Last Sync">
+<!ENTITY options.panemain.sync_btn "Synchronize">
+<!ENTITY options.panemain.forgot_btn "Forgot Email or Password?">
 
-<!ENTITY menu.sync "Sync Add-ons">
+<!ENTITY installer.title "Siphon - Installer">
+<!ENTITY installer.label "Addons to Install">
+
+<!ENTITY menu.sync "Synchronize">
 <!ENTITY menu.settings "Settings">
-<!ENTITY menu.website "Go to Syncons.com">
+
+<!ENTITY close "Close">

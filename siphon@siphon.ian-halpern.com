@@ -1,1 +1,1 @@
-~/Development/Firefox Extensions/Siphon.bzr
+~/Development/Siphon/branches/Siphon.xpi.bzr

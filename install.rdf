@@ -5,7 +5,7 @@
 	<Description about="urn:mozilla:install-manifest">
 
 		<em:id>siphon@siphon.ian-halpern.com</em:id>
-		<em:name>Siphon Add-on Syncronizer</em:name>
+		<em:name>Siphon Add-on Synchronizer</em:name>
 		<em:version>1.0</em:version>
 		<em:description>Keep your favorite Add-ons synced with all your computers.</em:description>
 		<em:creator>Ian Halpern</em:creator>
@@ -13,7 +13,7 @@
 		<em:contributor>A person who helped you</em:contributor>
 		<em:contributor>Another one</em:contributor> -->
 		<em:homepageURL>http://siphon.ian-halpern.com</em:homepageURL>
-		<!--em:optionsURL>chrome://sampleext/content/settings.xul</em:optionsURL>
+		<!--
 		<em:aboutURL>chrome://sampleext/content/about.xul</em:aboutURL>
 		<em:iconURL>chrome://sampleext/skin/mainicon.png</em:iconURL>
 		<em:updateURL>http://sampleextension.mozdev.org/update.rdf</em:updateURL-->

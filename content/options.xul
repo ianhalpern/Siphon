@@ -1,53 +1,73 @@
 <?xml version="1.0"?>
-
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
-<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
 <?xml-stylesheet href="chrome://siphon/skin/main.css"?>
 
 <!DOCTYPE prefwindow SYSTEM "chrome://siphon/locale/siphon.dtd">
 
+<!--
+
+   Copyright (c) 2009 Ian Halpern
+   http://siphon.ian-halpern.com
+
+   This file is part of Siphon.
+
+   Siphon is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   Siphon is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Siphon.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
 <prefwindow type="prefwindow"
-            id="BrowserPreferences"
-            windowtype="Browser:Preferences"
-            ondialoghelp=""
-            ondialogcancel="SiphonSettings.onDialogClose(event)"
-            title="Siphon Settings"
-            xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-            style="">
+  id="BrowserPreferences"
+  windowtype="Browser:Preferences"
+  ondialoghelp=""
+  ondialogcancel="SiphonSettings.onDialogClose(event)"
+  title="&options.title;"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  style="">
 
 	<script src="options.js" />
 
-	<script>
+	<script type="text/javascript">
 
-	var win = Components.classes['@mozilla.org/appshell/window-mediator;1']
-	  .getService(Components.interfaces.nsIWindowMediator)
-	  .getMostRecentWindow('navigator:browser')
+	var win = Components.classes[ '@mozilla.org/appshell/window-mediator;1' ]
+	  .getService( Components.interfaces.nsIWindowMediator )
+	  .getMostRecentWindow( 'navigator:browser' )
 
-	window.addEventListener("load", function( ){
-		SiphonSettings.init(win)
-	}, false)
+	window.addEventListener( "load", function( ) {
+		SiphonSettings.init( win )
+	}, false )
 
 	</script>
 
-	<prefpane id="paneMain" label="General">
+	<prefpane id="paneMain" label="&options.panemain.title;">
 		<preferences>
 			<preference id="pref-email"    name="extensions.siphon.email"    type="string" />
 			<preference id="pref-password" name="extensions.siphon.password" type="string" />
 		</preferences>
 
 		<groupbox>
-			<caption label="Account" />
+			<caption label="&options.panemain.caption;" />
 
 			<vbox>
 				<groupbox>
 					<hbox> <label id="loggin-status" value="" style="color:red;font-weight:bold;"/></hbox>
 					<hbox align="center">
-						<label control="l-email" value="Email:"/>
+						<label control="l-email" value="&options.panemain.email;:"/>
 						<spacer flex="1" />
 						<textbox id="l-email" preference="pref-email" />
 					</hbox>
 					<hbox align="center">
-						<label control="l-password" value="Password:"/>
+						<label control="l-password" value="&options.panemain.password;:"/>
 						<spacer flex="1" />
 						<textbox id="l-password" type="password" preference="pref-password" />
 					</hbox>
@@ -55,23 +75,23 @@
 
 				<separator />
 				<hbox align="center">
-					<label value="Last Sync:"/>
+					<label value="&options.panemain.last_sync;:"/>
 					<label id="last-sync" value=""/>
 					<spacer flex="1" />
 					<image id="throbber" style="display:none;" src="chrome://siphon/content/throbber/throbber.png" />
 					<spacer flex="1" />
-					<button id="sync-btn" label="Synchronize" oncommand="SiphonSettings.onSyncCommand()"/>
+					<button id="sync-btn" label="&options.panemain.sync_btn;" oncommand="SiphonSettings.onSyncCommand()"/>
 					<button id="sync-stop-btn" style="display:none;" label="Stop"
 						oncommand="SiphonSettings.onSyncStopCommand()"/>
 				</hbox>
 				<separator />
-				<button label="Forgot Username or Password" />
+				<button label="&options.panemain.forgot_btn;" />
 			</vbox>
 		</groupbox>
 	</prefpane>
 
 
-    <prefpane id="paneSecurity" label="Sign up">
+	<prefpane id="paneSecurity" label="Sign up">
 
 		<groupbox id="startupGroup">
 			<caption label="Sign Up"/>
@@ -109,5 +129,26 @@
 			</vbox>
 		</groupbox>
 	</prefpane>
+
+<!--	<prefpane id="paneInstaller" label="Installer">
+
+			<hbox align="center" style="padding-bottom:10px">
+				<image src="chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png" />
+				<label value="&installer.label;" style="font-weight: bold; font-size: 14px;"/>
+				<image id="throbber" style="display:none;" src="chrome://siphon/content/throbber/throbber.png" />
+			</hbox>
+
+			<richlistbox id="siphon_addon_listbox" style='overflow: auto; height: 200px;'>
+				<richlistitem align="center" style="padding: 10px;">
+					<image src="chrome://firebug/content/firebug.png" />
+					<label class="addon-name" value="Firebug" style="font-weight: bold;" />
+					<label value="1.65" />
+					<spacer flex="1"/>
+					<button label="installed" disabled="true"/>
+					<button label="remove" oncommand="Siphon.onGetAddonCommand()"/>
+				</richlistitem>
+			</richlistbox>
+
+	</prefpane> -->
 </prefwindow>
 

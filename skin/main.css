@@ -1,20 +1,3 @@
-/* This is just an example. You shouldn't do this. */
-menuitem#syncons-hello {
-  color: red !important;
-}
-
-statusbarpanel #syncons-icon {
-  cursor: pointer;
-}
-
-richlistitem {
-  padding: 10px;
-}
-
-.addon_name {
-  font-weight: bold;
-}
-
 .invalid {
   width: 12px;
   height: 12px;
@@ -25,4 +8,30 @@ richlistitem {
   width: 12px;
   height: 12px;
   background: url(validate/valid.png) no-repeat top left;
+}
+
+#siphon-statusbar-num {
+	cursor: pointer;
+	font-weight: bold;
+	font-family: sans-serif;
+	text-align: center;
+	color: white;
+	width: 16px;
+	height: 16px;
+	background-image: url(chrome://siphon/content/icons/default.png);
+}
+
+#BrowserPreferences radio[pane=paneInstaller] {
+  list-style-image: url("chrome://mozapps/skin/extensions/viewButtons.png");
+  -moz-image-region: rect(0px, 192px, 32px, 160px)
+}
+
+#BrowserPreferences radio[pane=paneMain] {
+  list-style-image: url("chrome://browser/skin/preferences/Options.png"); 
+  -moz-image-region: rect(0px, 32px,  32px, 0px)
+}
+
+#BrowserPreferences radio[pane=paneSecurity] {
+  list-style-image: url("chrome://browser/skin/preferences/Options.png"); 
+  -moz-image-region: rect(0px, 192px,  32px, 160px)
 }
