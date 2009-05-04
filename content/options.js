@@ -220,17 +220,20 @@ var SiphonSettings = {
 	},
 
 	onSignUpSucceeded: function ( ) {
+		try {
 		this.win.Siphon.resetPrefs( )
 		this.win.Siphon.unsetFirstRun( )
 		this.win.Siphon.prefs.setCharPref( "email", document.getElementById("s-email").value )
 		this.win.Siphon.prefs.setCharPref( "password", document.getElementById("s-password").value )
 
-		this.win.Siphon.synchronize( )
-
 		this.setSignUpSucceededUI( )
+
+		var $this = this
 
 		setTimeout( function ( ) {
 			document.documentElement.showPane( document.getElementById( "paneMain" ) )
+			$this.onSyncCommand( )
 		}, 500 )
+		} catch ( e ) { alert( e ) }
 	}
 }
