@@ -68,52 +68,6 @@ var JSON = {
 	}
 }
 
-var Ajax = {
-	Request: function ( url, callback, options ) {
-		options = options || { }
-
-		var http_request = new XMLHttpRequest( )
-
-		http_request.onreadystatechange = function ( ) {
-			if ( http_request.readyState == 4 ) {
-				if ( http_request.status == 200 ) {
-					callback( http_request.responseText )
-				} else {
-				//	alert('There was a problem with the request.');
-				}
-			}
-		}
-
-		http_request.open( 'GET', url + "?" + this.encodeParams( options.params ), true )
-
-	//	alert(url+"?"+(options.params||''))
-	//	if (options.method == "POST") {
-		//	options.params = options.params || ''
-		//	http_request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-		//	http_request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-		//	http_request.setRequestHeader("Content-length", options.params.length);
-		//	http_request.setRequestHeader("Connection", "close");
-		//	http_request.send(options.params)
-	//	} else {
-			http_request.send( null )
-	//	}
-		return http_request
-	},
-
-	encodeParams: function ( params ) {
-		var params_str = ""
-
-		params = params || { }
-
-		for ( var name in params ) {
-			if ( params_str ) params_str += "&"
-			params_str += name + "=" + escape( params[ name ] )
-		}
-
-		return params_str
-	}
-}
-
 var cancelEvent = function ( e ) {
 	e = e ? e : window.event
 	if( e.stopPropagation )
@@ -162,7 +116,7 @@ else {
 
 	Siphon = {
 
-		update_uri: "http://siphon.ian-halpern.com/update",
+		update_uri: "http://siphon.ian-halpern.com/update/",
 		uninstalled_addons: null,
 		defualt_icon_url: 'chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png',
 		app_id: '',
@@ -313,7 +267,7 @@ else {
 				+ "&appABI="        + this.app_ABI
 				+ "&locale="        + this.locale
 
-			Ajax.Request( url, function( rdf_xml ) {
+			new Request( url ).start( function( rdf_xml ) {
 
 				var start = rdf_xml.indexOf( '<em:updateLink>' )
 				if ( start != -1 ) start += '<em:updateLink>'.length
@@ -392,22 +346,19 @@ else {
 
 			var $this = this
 
-			return Ajax.Request( this.update_uri, function( json_str ) {
-
-				var json = eval( '(' + json_str + ')' )
+			return new Request( this.update_uri, Object.merge( {
+				type:     "",
+				email:    this.prefs.getCharPref( "email" ),
+				password: this.prefs.getCharPref( "password" ),
+				rand:     new Date( ).getTime( )
+			}, params ) ).start( function( json_str ) {
+					json = eval( "(" + json_str + ")" )
 
 				if ( json.retval > 0 )
 					onSuccess.call( $this, json )
 				else
 					onFail.call( $this, json )
 
-			}, {
-				params: Object.merge( {
-					type:     "",
-					email:    this.prefs.getCharPref( "email" ),
-					password: this.prefs.getCharPref( "password" ),
-					rand:     new Date( ).getTime( )
-				}, params )
 			} )
 
 		}

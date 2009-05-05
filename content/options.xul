@@ -85,7 +85,7 @@
 						oncommand="SiphonSettings.onSyncStopCommand()"/>
 				</hbox>
 				<separator />
-				<button label="&options.panemain.forgot_btn;" />
+				<button label="&options.panemain.forgot_btn;" oncommand="SiphonSettings.onForgotCommand()" />
 			</vbox>
 		</groupbox>
 	</prefpane>

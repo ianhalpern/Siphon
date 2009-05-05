@@ -27,6 +27,7 @@
 <overlay id="siphon-status-bar"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
+	<script src="network.js" />
 	<script src="siphon.js" />
 
 	<statusbar id="status-bar">
@@ -43,12 +44,9 @@
 												oncommand="Siphon.onStatusBarMenuItemCommand(event.target.value)">
 				<menuitem value="sync" label="&menu.sync;"/>
 				<menuitem value="settings" label="&menu.settings;"/>
-				<!--<menuseparator/>
-				<menuitem value="Website" label="&menu.website;"/>-->
 			</menupopup>
 		</statusbarpanel>
 	</statusbar>
-
 
 	<!--<menupopup id="menu_ToolsPopup">
 		<menuitem id="siphon-hello" label="&title.label;"

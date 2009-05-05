@@ -166,6 +166,8 @@ var SiphonSettings = {
 	},
 
 	onSyncCommand: function() {
+		this.win.Siphon.prefs.setCharPref( "email", document.getElementById("l-email").value )
+		this.win.Siphon.prefs.setCharPref( "password", document.getElementById("l-password").value )
 		this.setSyncingUI()
 		try {
 		this.win.Siphon.synchronize(
@@ -194,7 +196,7 @@ var SiphonSettings = {
 	},
 
 	onForgotCommand: function() {
-		// TODO:
+		this.win.openUILink( "http://siphon.ian-halpern.com/forgot/" )
 	},
 
 	onSignUpChange: function() {
@@ -231,8 +233,10 @@ var SiphonSettings = {
 		var $this = this
 
 		setTimeout( function ( ) {
-			document.documentElement.showPane( document.getElementById( "paneMain" ) )
-			$this.onSyncCommand( )
+			try {
+				document.documentElement.showPane( document.getElementById( "paneMain" ) )
+				$this.onSyncCommand( )
+			} catch ( e ) { alert ( e ) }
 		}, 500 )
 		} catch ( e ) { alert( e ) }
 	}
