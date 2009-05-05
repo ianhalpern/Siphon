@@ -116,8 +116,7 @@ else {
 
 	Siphon = {
 
-	//	update_uri: "http://siphon.ian-halpern.com/update/",
-		update_uri: "http://ian-halpern.com/sites/__available__/siphon.ian-halpern.com/0.0.5-qa/update/",
+		update_uri: "http://siphon.ian-halpern.com/update/",
 		uninstalled_addons: null,
 		defualt_icon_url: 'chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png',
 		app_id: '',
