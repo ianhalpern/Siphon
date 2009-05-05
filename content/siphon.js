@@ -213,7 +213,7 @@ else {
 		},
 
 		openSettingsDialog: function ( ) {
-			var features = "chrome,titlebar,toolbar,centerscreen,modal,width=350, height=400"
+			var features = "chrome,titlebar,toolbar,centerscreen,width=350, height=400"
 			window.openDialog( "chrome://siphon/content/options.xul", "Preferences", features )
 		},
 
