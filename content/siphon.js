@@ -116,7 +116,8 @@ else {
 
 	Siphon = {
 
-		update_uri: "http://siphon.ian-halpern.com/update/",
+	//	update_uri: "http://siphon.ian-halpern.com/update/",
+		update_uri: "http://ian-halpern.com/sites/__available__/siphon.ian-halpern.com/0.0.5-qa/update/",
 		uninstalled_addons: null,
 		defualt_icon_url: 'chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png',
 		app_id: '',
@@ -246,6 +247,10 @@ else {
 			if ( new_addons ) this.openInstallerWindow( )
 		},
 
+		onForgotCommand: function ( onSuccess, onFail ) {
+			this.update( { type: "forgot" }, onSuccess, onFail )
+		},
+
 		onGetAddonCommand: function( guid ) {
 			var addon, $this = this
 
@@ -352,7 +357,7 @@ else {
 				password: this.prefs.getCharPref( "password" ),
 				rand:     new Date( ).getTime( )
 			}, params ) ).start( function( json_str ) {
-					json = eval( "(" + json_str + ")" )
+				var json = eval( "(" + json_str + ")" )
 
 				if ( json.retval > 0 )
 					onSuccess.call( $this, json )

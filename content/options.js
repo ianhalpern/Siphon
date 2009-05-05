@@ -195,8 +195,11 @@ var SiphonSettings = {
 			this.alertSyncStatus( "Synchronize Failed" )
 	},
 
-	onForgotCommand: function() {
-		this.win.openUILink( "http://siphon.ian-halpern.com/forgot/" )
+	onForgotCommand: function( ) {
+		var $this = this
+		this.win.Siphon.onForgotCommand( function ( ) {
+			$this.alertSyncStatus( "You have been sent an email." )
+		} )
 	},
 
 	onSignUpChange: function() {
