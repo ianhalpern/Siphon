@@ -1,6 +1,7 @@
 content	siphon	content/
 locale	siphon	en-US	locale/en-US/
 skin	siphon	classic/1.0	skin/
+resource	siphon	./
 
-style	chrome://global/content/customizeToolbar.xul  chrome://siphon/skin/main.css
+style	chrome://global/content/customizeToolbar.xul	chrome://siphon/skin/main.css
 overlay	chrome://browser/content/browser.xul	chrome://siphon/content/browser.xul

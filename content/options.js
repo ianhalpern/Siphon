@@ -1,7 +1,7 @@
 /*
  *
  *+   Copyright (c) 2009 Ian Halpern
- *@   http://siphon.ian-halpern.com
+ *@   http://siphon-fx.com
  *
  *    This file is part of Siphon.
  *
@@ -21,34 +21,22 @@
 
 var SiphonSettings = {
 
-	win: null,
-
-	init: function( win ) {
-		this.win = win
-
-		document.getElementById( "last-sync" ).setAttribute( "value", this.win.Siphon.prefs.getCharPref( "last_sync" ) )
-
-		if ( this.win.Siphon.sync_transport ) this.setSyncingUI( )
-
-		document.getElementById( "loggin-status" ).style.display = "none"
+	init: function( ) {
+		document.getElementById( "last-sync" ).setAttribute( "value", Siphon.prefs.getCharPref( "last_sync" ) )
+		this.updateStatus( )
 	},
 
 	setSyncingUI: function() {
-		document.getElementById("throbber").style.display = "block"
-		document.getElementById("sync-btn").style.display = "none"
-		document.getElementById("sync-stop-btn").style.display = "block"
+		this.disableMainButtons( )
+		document.getElementById("throbber").style.visibility = "visible"
+		document.getElementById("sync-stop-btn").style.visibility = "visible"
 	},
 
 	setSyncStoppedUI: function() {
-		document.getElementById("throbber").style.display = "none"
-		document.getElementById("sync-btn").style.display = "block"
-		document.getElementById("sync-stop-btn").style.display = "none"
-		document.getElementById("last-sync").setAttribute("value", this.win.Siphon.prefs.getCharPref("last_sync"))
-	},
-
-	setLogginSucceededUI: function() {
-		this.setLoggedInUI()
-		this.alertSyncStatus("Login Succeeded")
+		document.getElementById("throbber").style.visibility = "hidden"
+		document.getElementById("sync-stop-btn").style.visibility = "hidden"
+		document.getElementById("last-sync").setAttribute("value", Siphon.prefs.getCharPref("last_sync"))
+		this.enableMainButtons( )
 	},
 
 	setLogginFailedUI: function() {
@@ -68,6 +56,7 @@ var SiphonSettings = {
 
 	setSignUpableUI: function() {
 		document.getElementById("sign-up-btn").disabled = false
+		document.getElementById("close-sign-up-btn").disabled = false
 	},
 
 	setUnsignUpableUI: function() {
@@ -76,25 +65,39 @@ var SiphonSettings = {
 
 	setSigningUpUI: function() {
 		document.getElementById("throbber-sign-up").style.display = "block"
-		document.getElementById("sign-up-btn").style.display = "none"
 		document.getElementById("stop-sign-up-btn").style.display = "block"
-		document.getElementById("s-email").disabled = true
-		document.getElementById("s-password").disabled = true
+		document.getElementById("sign-up-btn").style.display = "none"
+		document.getElementById("close-sign-up-btn").disabled =
+		document.getElementById("s-email").disabled =
+		document.getElementById("s-password").disabled =
 		document.getElementById("r-password").disabled = true
 	},
 
 	setSignedUpUI: function() {
 		document.getElementById("throbber-sign-up").style.display = "none"
-		document.getElementById("sign-up-btn").style.display = "block"
 		document.getElementById("stop-sign-up-btn").style.display = "none"
-		document.getElementById("s-email").disabled = false
-		document.getElementById("s-password").disabled = false
+		document.getElementById("sign-up-btn").style.display = "block"
+		document.getElementById("close-sign-up-btn").disabled =
+		document.getElementById("s-email").disabled =
+		document.getElementById("s-password").disabled =
 		document.getElementById("r-password").disabled = false
 
 		if (this.validateSignUpText())
 			this.setSignUpableUI()
 		else
 			this.setUnsignUpableUI()
+	},
+
+	disableMainButtons: function ( ) {
+		document.getElementById("sync-btn").disabled =
+		document.getElementById("show-sign-up-btn").disabled =
+		document.getElementById("forgot-btn").disabled = true
+	},
+
+	enableMainButtons: function ( ) {
+		document.getElementById("sync-btn").disabled =
+		document.getElementById("show-sign-up-btn").disabled =
+		document.getElementById("forgot-btn").disabled = false
 	},
 
 	clearSignUpUI: function() {
@@ -104,20 +107,18 @@ var SiphonSettings = {
 	},
 
 	alertSyncStatus: function (message) {
-		this.alertStatus("loggin-status", message)
+		this.alertStatus("alert-status", message)
 	},
 
 	alertSignupStatus: function (message) {
-		this.alertStatus("signup-status", message)
+		this.alertStatus("alert-status", message)
 	},
 
 	alertStatus: function (el_id, message) {
-		document.getElementById( "loggin-status" ).style.display = "block"
 		document.getElementById(el_id).setAttribute("value", message)
 		setTimeout(function() {
-			document.getElementById( "loggin-status" ).style.display = "none"
 			document.getElementById(el_id).setAttribute("value", "")
-		}, 1000);
+		}, 1500);
 	},
 
 	validateLogInText: function() {
@@ -155,22 +156,50 @@ var SiphonSettings = {
 
 	validateSignUpInfo: function(onSuccess, onFail) {
 	//	setTimeout(onSuccess, 500)
-		this.win.Siphon.signup(
+		Siphon.signup(
 			document.getElementById("s-email").value, document.getElementById("s-password").value,
 			onSuccess, onFail
 		)
 	},
 
-	onDialogClose: function(e) {
-	// TODO:
+	updateStatus: function ( ) {
+		if ( Siphon.nUninstalledAddons( ) ) {
+			document.getElementById( "status-uninstalled-icon" ).className = "icon-alert"
+			document.getElementById( "status-uninstalled-label" ).value =
+			  Siphon.nUninstalledAddons( ) +
+			  " addon" + ( Siphon.nUninstalledAddons( ) != 1 ? "s" : "" ) +
+			  " need" + ( Siphon.nUninstalledAddons( ) != 1 ? "" : "s" ) +
+			  " to be installed."
+		} else {
+			document.getElementById( "status-uninstalled-icon" ).className = "icon-success"
+			document.getElementById( "status-uninstalled-label" ).value = "No addons need to be installed!"
+		}
+
+		document.getElementById( "status-installed-label" ).value =
+		  Siphon.em.getItemList( 2, [ ] ).length +
+		  " addon" + ( Siphon.em.getItemList( 2, [ ] ).length != 1 ? "s" : "" ) +
+		  " installed, " +
+		  Siphon.ignored_addons.length + 
+		  " addon" + ( Siphon.ignored_addons.length != 1 ? "s" : "" ) +
+		  " ignored."
+	},
+
+	openSignup: function ( ) {
+		document.getElementById( "login-vbox" ).style.display = "none"
+		document.getElementById( "signup-vbox" ).style.display = "block"
+	},
+
+	closeSignup: function ( ) {
+		document.getElementById( "login-vbox" ).style.display = "block"
+		document.getElementById( "signup-vbox" ).style.display = "none"
 	},
 
 	onSyncCommand: function() {
-		this.win.Siphon.prefs.setCharPref( "email", document.getElementById("l-email").value )
-		this.win.Siphon.prefs.setCharPref( "password", document.getElementById("l-password").value )
+		Siphon.prefs.setCharPref( "email", document.getElementById("l-email").value )
+		Siphon.prefs.setCharPref( "password", document.getElementById("l-password").value )
 		this.setSyncingUI()
 		try {
-		this.win.Siphon.synchronize(
+		Siphon.synchronize(
 			function(retval){SiphonSettings.onSyncSucceeded(retval)},
 			function(retval){SiphonSettings.onSyncFailed(retval)}
 		)
@@ -179,7 +208,7 @@ var SiphonSettings = {
 
 	onSyncStopCommand: function() {
 		this.setSyncStoppedUI()
-		this.win.Siphon.abortSync()
+		Siphon.abortSync()
 	},
 
 	onSyncSucceeded: function ( retval ) {
@@ -197,7 +226,7 @@ var SiphonSettings = {
 
 	onForgotCommand: function( ) {
 		var $this = this
-		this.win.Siphon.onForgotCommand( function ( ) {
+		Siphon.onForgotCommand( function ( ) {
 			$this.alertSyncStatus( "You have been sent an email." )
 		} )
 	},
@@ -221,15 +250,15 @@ var SiphonSettings = {
 
 	onSignUpStopCommand: function() {
 		this.setSignedUpUI()
-		this.win.Siphon.abortSignup()
+		Siphon.abortSignup()
 	},
 
 	onSignUpSucceeded: function ( ) {
 		try {
-		this.win.Siphon.resetPrefs( )
-		this.win.Siphon.unsetFirstRun( )
-		this.win.Siphon.prefs.setCharPref( "email", document.getElementById("s-email").value )
-		this.win.Siphon.prefs.setCharPref( "password", document.getElementById("s-password").value )
+		Siphon.resetPrefs( )
+		Siphon.unsetFirstRun( )
+		Siphon.prefs.setCharPref( "email", document.getElementById("s-email").value )
+		Siphon.prefs.setCharPref( "password", document.getElementById("s-password").value )
 
 		this.setSignUpSucceededUI( )
 
@@ -237,10 +266,102 @@ var SiphonSettings = {
 
 		setTimeout( function ( ) {
 			try {
-				document.documentElement.showPane( document.getElementById( "paneMain" ) )
+				$this.closeSignup( )
 				$this.onSyncCommand( )
 			} catch ( e ) { alert ( e ) }
-		}, 500 )
+		}, 1000 )
 		} catch ( e ) { alert( e ) }
 	}
+}
+
+var SiphonInstaller = {
+
+	init: function ( ) {
+		this.draw( )
+	},
+
+	draw: function ( ) {
+		for ( var i = 0; i < Siphon.uninstalled_addons.length; i++ ) {
+			document.getElementById('siphon_addon_listbox').appendChild(
+				this.createAddonListitem(
+					Siphon.uninstalled_addons[ i ].name,
+					Siphon.uninstalled_addons[ i ].version,
+					Siphon.uninstalled_addons[ i ].id
+				)
+			)
+		}
+	},
+
+	clear: function ( ) {
+		while ( document.getElementById( 'siphon_addon_listbox' ).hasChildNodes( ) )
+			document.getElementById( 'siphon_addon_listbox' ).removeChild( document.getElementById( 'siphon_addon_listbox' ).childNodes[ 0 ] )
+	},
+
+	redraw: function ( ) {
+		this.clear( )
+		this.draw( )
+	},
+
+	createAddonListitem: function ( name, version, guid ) {
+
+		var list_item = document.createElement( 'richlistitem' )
+		list_item.setAttribute( "align", "center" )
+		list_item.setAttribute( "id", guid )
+
+		var icon = document.createElement( "image" )
+		icon.setAttribute( "src", "chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png" )
+		list_item.appendChild( icon )
+
+		var addon_name = document.createElement( 'label' )
+		addon_name.setAttribute( "class", "addon_name" )
+		addon_name.setAttribute( "value", name )
+		list_item.appendChild( addon_name )
+
+		var addon_version = document.createElement( 'label' )
+		addon_version.setAttribute( "value", version )
+		list_item.appendChild( addon_version )
+
+		var spacer = document.createElement( 'spacer' )
+		spacer.setAttribute( "flex", "1" )
+		list_item.appendChild( spacer )
+
+		var onChecked = function ( ) {
+			if ( checkbox.getAttribute( "checked" ) ) {
+				install_btn.setAttribute( "disabled", "true" )
+				Siphon.ignoreAddon( guid )
+			} else {
+				Siphon.unignoreAddon( guid )
+				install_btn.setAttribute( "disabled", "false" )
+			}
+			SiphonSettings.updateStatus( )
+		}
+
+		var checkbox = document.createElement( 'checkbox' )
+		checkbox.setAttribute( "label", "Ignore" )
+
+		checkbox.addEventListener( "command", onChecked, false )
+
+		list_item.appendChild( checkbox )
+
+		var install_btn = document.createElement( 'button' )
+		install_btn.setAttribute( "label", "install" )
+		//install_btn.setAttribute("disabled", "true")
+		install_btn.addEventListener( "command", function ( e ) {
+			install_btn.setAttribute( "disabled", "true" )
+			checkbox.setAttribute( "disabled", "true" )
+			//install_btn.setAttribute( "label", "restart" )
+			Siphon.onGetAddonCommand( guid )
+			//window.close( )
+		}, false )
+
+		list_item.appendChild( install_btn )
+
+		if ( Siphon.isAddonIgnored( guid ) ) {
+			checkbox.setAttribute( "checked", true )
+			onChecked( )
+		}
+
+		return list_item
+	}
+
 }

@@ -2,12 +2,11 @@
 import sys
 
 ID      = "siphon@siphon.ian-halpern.com"
-NAME    = "Siphon Extension Synchronizer"
-VERSION = sys.argv[ 1 ] or "UNKNOWN"
+NAME    = "Siphon - Sync Addons"
+VERSION = sys.argv[ 1 ] if len( sys.argv ) else "UNKNOWN"
 DESC    = "Keep your favorite Extensions synced with all your computers."
 AUTHOR  = "Ian Halpern"
-WEBSITE = "http://siphon.ian-halpern.com"
-
+WEBSITE = "http://siphon-fx.com"
 
 rdf = """<?xml version="1.0"?>
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -26,8 +25,8 @@ rdf = """<?xml version="1.0"?>
 		<em:homepageURL>%s</em:homepageURL>
 		<!--
 		<em:aboutURL>chrome://sampleext/content/about.xul</em:aboutURL>
-		<em:iconURL>chrome://sampleext/skin/mainicon.png</em:iconURL>
 		<em:updateURL>http://sampleextension.mozdev.org/update.rdf</em:updateURL-->
+		<em:iconURL>chrome://siphon/content/icons/icon-32x32.png</em:iconURL>
 		<em:optionsURL>chrome://siphon/content/options.xul</em:optionsURL>
 
 

@@ -4,8 +4,8 @@
 
 <!--
 
-   Copyright (c) 2009 Ian Halpern
-   http://siphon.ian-halpern.com
++  Copyright (c) 2009 Ian Halpern
+@  http://siphon-fx.com
 
    This file is part of Siphon.
 
@@ -27,24 +27,22 @@
 <overlay id="siphon-status-bar"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<script src="network.js" />
-	<script src="siphon.js" />
-
 	<statusbar id="status-bar">
 		<statusbarpanel>
-			<box id="siphon-statusbar" width="20" height="20" align="center" pack="center">
-					<label id="siphon-statusbar-num"
-						 context="siphon-contextmenu"
-						 onclick="Siphon.onStatusBarItemCommand(event)"
-					/>
+
+			<box id="siphon-statusbar" height="20" align="center" pack="center" onclick="Siphon.onStatusBarItemCommand(event)">
+				<box id="siphon-statusbar-icon" align="center" pack="center"></box>
+				<box id="siphon-statusbar-alert" align="center" pack="center" style="display:none;">
+					<label id="siphon-statusbar-num" />
+				</box>
 			</box>
 
-			<menupopup id="siphon-contextmenu" position="before_end"
+			<!--<menupopup id="siphon-contextmenu" position="before_end"
 												onpopupshowing=""
 												oncommand="Siphon.onStatusBarMenuItemCommand(event.target.value)">
 				<menuitem value="sync" label="&menu.sync;"/>
 				<menuitem value="settings" label="&menu.settings;"/>
-			</menupopup>
+			</menupopup>-->
 		</statusbarpanel>
 	</statusbar>
 
@@ -53,6 +51,12 @@
 		oncommand="Siphon.onMenuItemCommand(event);"/>
 	</menupopup>-->
 
+	<script>
+		Components.utils.import( "resource://siphon/modules/siphon.js" );
+		window.addEventListener( "load", function ( ) {
+			Siphon.updateStatusbars( )
+		}, false )
+	</script>
 
 </overlay>
 

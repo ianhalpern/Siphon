@@ -5,7 +5,7 @@
 <!ENTITY options.panemain.password "Password">
 <!ENTITY options.panemain.last_sync "Last Sync">
 <!ENTITY options.panemain.sync_btn "Synchronize">
-<!ENTITY options.panemain.forgot_btn "Forgot Email or Password?">
+<!ENTITY options.panemain.forgot_btn "Forgot Password?">
 
 <!ENTITY installer.title "Siphon - Installer">
 <!ENTITY installer.label "Addons to Install">

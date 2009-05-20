@@ -1,37 +1,72 @@
 .invalid {
-  width: 12px;
-  height: 12px;
-  background: url(validate/invalid.png) no-repeat top left;
+	width: 12px;
+	height: 12px;
+	background: url(validate/invalid.png) no-repeat top left;
 }
 
 .valid {
-  width: 12px;
-  height: 12px;
-  background: url(validate/valid.png) no-repeat top left;
+	width: 12px;
+	height: 12px;
+	background: url(validate/valid.png) no-repeat top left;
+}
+
+#siphon-statusbar {
+	cursor: pointer;
 }
 
 #siphon-statusbar-num {
 	cursor: pointer;
 	font-weight: bold;
 	font-family: sans-serif;
-	text-align: center;
+	font-size: 9px;
 	color: white;
+	margin: 0;
+	padding: 0;
+}
+
+#siphon-statusbar-alert {
 	width: 16px;
 	height: 16px;
-	background-image: url(chrome://siphon/content/icons/default.png);
+	background: url(chrome://siphon/content/icons/status-alert.png) no-repeat 0 1px;
+	text-align: center;
+	margin-left: -5px;
 }
 
-#BrowserPreferences radio[pane=paneInstaller] {
-  list-style-image: url("chrome://mozapps/skin/extensions/viewButtons.png");
-  -moz-image-region: rect(0px, 192px, 32px, 160px)
+#siphon-statusbar-icon {
+	width: 16px;
+	height: 16px;
+	background: url(chrome://siphon/content/icons/icon-16x16.png) no-repeat 0 0px;
 }
 
-#BrowserPreferences radio[pane=paneMain] {
-  list-style-image: url("chrome://browser/skin/preferences/Options.png"); 
-  -moz-image-region: rect(0px, 32px,  32px, 0px)
+.icon-attention {
+	width: 16px;
+	height: 16px;
+	background: url(chrome://siphon/content/icons/status-attention.png) no-repeat 0 0px;
 }
 
-#BrowserPreferences radio[pane=paneSecurity] {
-  list-style-image: url("chrome://browser/skin/preferences/Options.png"); 
+.icon-alert {
+	width: 16px;
+	height: 16px;
+	background: url(chrome://siphon/content/icons/status-alert.png) no-repeat 0 0px;
+}
+
+.icon-success {
+	width: 16px;
+	height: 16px;
+	background: url(chrome://siphon/content/icons/status-success.png) no-repeat 0 0px;
+}
+
+#siphon-preferences radio[pane=pane-installer] {
+	list-style-image: url("chrome://mozapps/skin/extensions/viewButtons.png");
+	-moz-image-region: rect(0px, 192px, 32px, 160px)
+}
+
+#siphon-preferences radio[pane=pane-settings] {
+	list-style-image: url("chrome://browser/skin/preferences/Options.png");
+	-moz-image-region: rect(0px, 32px,  32px, 0px)
+}
+
+/*#BrowserPreferences radio[pane=paneSecurity] {
+  list-style-image: url("chrome://browser/skin/preferences/Options.png");
   -moz-image-region: rect(0px, 192px,  32px, 160px)
-}
+}*/
