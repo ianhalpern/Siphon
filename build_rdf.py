@@ -2,7 +2,7 @@
 import sys
 
 ID      = "siphon@siphon.ian-halpern.com"
-NAME    = "Siphon - Sync Addons"
+NAME    = "Siphon - Sync Add-ons"
 VERSION = sys.argv[ 1 ] if len( sys.argv ) else "UNKNOWN"
 DESC    = "Keep your favorite Extensions synced with all your computers."
 AUTHOR  = "Ian Halpern"
