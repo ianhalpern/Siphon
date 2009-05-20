@@ -27,8 +27,7 @@ var Siphon = {
 
 	instances: 0,
 
-	//update_uri: "http://siphon-fx.com/update/",
-	update_uri: "http://ian-halpern.com/sites/__available__/siphon-fx.com/0.0.7-qa/update/",
+	update_uri: "http://siphon-fx.com/update/",
 	months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
 	uninstalled_addons: null,
 	ignored_addons: null,
@@ -90,7 +89,7 @@ var Siphon = {
 
 		if ( this.prefs.getBoolPref( "first_run" ) ) {
 			this.unsetFirstRun( )
-			this.openSettingsDialog( )
+			this.openSettingsDialog( "pane-settings" )
 		}
 
 	},
@@ -284,7 +283,7 @@ var Siphon = {
 				this.afterSync( )
 			},
 			function ( json ) {
-				onFail.call( this, json.retval )
+				if ( onFail ) onFail.call( this, json.retval )
 			}
 		)
 
@@ -311,10 +310,13 @@ var Siphon = {
 
 			// alert( json.message )
 
-			if ( json && json.retval > 0 )
+			if ( json && json.retval > 0 ) {
+				$this.invalid_account = false
 				onSuccess.call( $this, json )
-			else
+			} else {
+				if ( !json.retval ) $this.invalid_account = true
 				onFail.call( $this, json || { } )
+			}
 
 		} )
 

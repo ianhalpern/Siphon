@@ -65,7 +65,7 @@
 					<groupbox>
 							<box>
 								<box id="status-uninstalled-icon" class="icon-alert" align="center" pack="center"></box>
-								<label id="status-uninstalled-label"  value="1 addon needs to be installed."/>
+								<label id="status-uninstalled-label"/>
 							</box>
 							<box>
 								<box class="icon-attention" align="center" pack="center"></box>

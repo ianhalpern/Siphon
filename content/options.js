@@ -26,7 +26,7 @@ var SiphonSettings = {
 	},
 
 	draw: function ( ) {
-		document.getElementById( "last-sync" ).setAttribute( "value", Siphon.prefs.getCharPref( "last_sync" ) )
+		document.getElementById( "last-sync" ).setAttribute( "value", Siphon.prefs.getCharPref( "last_sync" ) || "Not synced yet." )
 		this.updateStatus( )
 	},
 
@@ -171,7 +171,10 @@ var SiphonSettings = {
 	},
 
 	updateStatus: function ( ) {
-		if ( Siphon.nUninstalledAddons( ) ) {
+		if ( Siphon.invalid_account ) {
+			document.getElementById( "status-uninstalled-icon" ).className = "icon-alert"
+			document.getElementById( "status-uninstalled-label" ).value = "Account invalid. Please login or sign up."
+		} else if ( Siphon.nUninstalledAddons( ) ) {
 			document.getElementById( "status-uninstalled-icon" ).className = "icon-alert"
 			document.getElementById( "status-uninstalled-label" ).value =
 			  Siphon.nUninstalledAddons( ) +
@@ -320,14 +323,22 @@ var SiphonInstaller = {
 		icon.setAttribute( "src", "chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png" )
 		list_item.appendChild( icon )
 
+		var name_box = document.createElement( "box" )
+		name_box.setAttribute( "style", "overflow:hidden; width: 120px; whitespace: nowrap" )
+		list_item.appendChild( name_box )
+
 		var addon_name = document.createElement( 'label' )
 		addon_name.setAttribute( "class", "addon_name" )
 		addon_name.setAttribute( "value", name )
-		list_item.appendChild( addon_name )
+		name_box.appendChild( addon_name )
+
+		var version_box = document.createElement( "box" )
+		version_box.setAttribute( "style", "overflow:hidden; width: 40px; whitespace: nowrap" )
+		list_item.appendChild( version_box )
 
 		var addon_version = document.createElement( 'label' )
 		addon_version.setAttribute( "value", version )
-		list_item.appendChild( addon_version )
+		version_box.appendChild( addon_version )
 
 		var spacer = document.createElement( 'spacer' )
 		spacer.setAttribute( "flex", "1" )
