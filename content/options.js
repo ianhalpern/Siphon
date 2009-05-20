@@ -22,8 +22,16 @@
 var SiphonSettings = {
 
 	init: function( ) {
+		this.draw( )
+	},
+
+	draw: function ( ) {
 		document.getElementById( "last-sync" ).setAttribute( "value", Siphon.prefs.getCharPref( "last_sync" ) )
 		this.updateStatus( )
+	},
+
+	redraw: function ( ) {
+		this.draw( )
 	},
 
 	setSyncingUI: function() {

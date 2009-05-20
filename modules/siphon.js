@@ -84,12 +84,32 @@ var Siphon = {
 		this.ignored_addons = [ ]
 		if ( this.prefs.getCharPref( "ignore_list" ) )
 			this.ignored_addons = this.prefs.getCharPref( "ignore_list" ).split( "," )
+
 		this.synchronize( )
+		this.startPeriodicSynchronizer( 10 )
 
 		if ( this.prefs.getBoolPref( "first_run" ) ) {
 			this.unsetFirstRun( )
 			this.openSettingsDialog( )
 		}
+
+	},
+
+	startPeriodicSynchronizer: function ( minutes ) {
+		var $this = this
+
+		var event = { notify: function ( ) {
+			$this.synchronize( )
+		} }
+
+		var timer = Components.classes[ "@mozilla.org/timer;1" ]
+		  .createInstance( Components.interfaces.nsITimer )
+
+		timer.initWithCallback(
+			event,
+			minutes * 60 * 1000,
+			Components.interfaces.nsITimer.TYPE_REPEATING_SLACK
+		)
 
 	},
 
@@ -323,7 +343,7 @@ var Siphon = {
 	tryAndOpenInstallerWindow: function ( ) {
 		if ( options_window ) {
 			options_window.SiphonInstaller.redraw( )
-			options_window.SiphonSettings.updateStatus( )
+			options_window.SiphonSettings.redraw( )
 		}
 		if ( this.nUninstalledAddons( ) ) this.openSettingsDialog( "pane-installer" )
 	},
