@@ -296,7 +296,7 @@ var SiphonInstaller = {
 			document.getElementById('siphon_addon_listbox').appendChild(
 				this.createAddonListitem(
 					Siphon.uninstalled_addons[ i ].name,
-					Siphon.uninstalled_addons[ i ].version,
+					//Siphon.uninstalled_addons[ i ].version,
 					Siphon.uninstalled_addons[ i ].id
 				)
 			)
@@ -313,7 +313,7 @@ var SiphonInstaller = {
 		this.draw( )
 	},
 
-	createAddonListitem: function ( name, version, guid ) {
+	createAddonListitem: function ( name, /*version,*/ guid ) {
 
 		var list_item = document.createElement( 'richlistitem' )
 		list_item.setAttribute( "align", "center" )
@@ -324,7 +324,7 @@ var SiphonInstaller = {
 		list_item.appendChild( icon )
 
 		var name_box = document.createElement( "box" )
-		name_box.setAttribute( "style", "overflow:hidden; width: 120px; whitespace: nowrap" )
+		name_box.setAttribute( "style", "overflow:hidden; width: 160px; whitespace: nowrap" )
 		list_item.appendChild( name_box )
 
 		var addon_name = document.createElement( 'label' )
@@ -332,13 +332,13 @@ var SiphonInstaller = {
 		addon_name.setAttribute( "value", name )
 		name_box.appendChild( addon_name )
 
-		var version_box = document.createElement( "box" )
-		version_box.setAttribute( "style", "overflow:hidden; width: 40px; whitespace: nowrap" )
-		list_item.appendChild( version_box )
+		//var version_box = document.createElement( "box" )
+		//version_box.setAttribute( "style", "overflow:hidden; width: 40px; whitespace: nowrap" )
+		//list_item.appendChild( version_box )
 
-		var addon_version = document.createElement( 'label' )
-		addon_version.setAttribute( "value", version )
-		version_box.appendChild( addon_version )
+		//var addon_version = document.createElement( 'label' )
+		//addon_version.setAttribute( "value", version )
+		//version_box.appendChild( addon_version )
 
 		var spacer = document.createElement( 'spacer' )
 		spacer.setAttribute( "flex", "1" )

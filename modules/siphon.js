@@ -43,10 +43,10 @@ var Siphon = {
 	  .getService( Components.interfaces.nsILocaleService ).getLocaleComponentForUserAgent( ),
 
 	app_ABI: Components.classes[ "@mozilla.org/xre/app-info;1" ]
-	  .getService( Components.interfaces.nsIXULAppInfo ).XPCOMABI,
+	  .getService( Components.interfaces.nsIXULRuntime ).XPCOMABI,
 
 	app_OS: Components.classes[ "@mozilla.org/xre/app-info;1" ]
-	  .getService( Components.interfaces.nsIXULAppInfo ).OS,
+	  .getService( Components.interfaces.nsIXULRuntime ).OS,
 
 	app_id: Components.classes[ "@mozilla.org/xre/app-info;1" ]
 	  .getService( Components.interfaces.nsIXULAppInfo ).ID,
@@ -162,7 +162,7 @@ var Siphon = {
 		if ( ! addon ) return
 
 		var url = 'https://versioncheck.addons.mozilla.org/update/VersionCheck.php?'
-			+ "reqVersion="     + addon.minAppVersion
+			+ "reqVersion=1"
 			+ "&id="            + addon.id
 			+ "&version="       + addon.version
 			+ "&maxAppVersion=" + addon.maxAppVersion
