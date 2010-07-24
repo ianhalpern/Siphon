@@ -54,7 +54,7 @@
 	<script>
 		Components.utils.import( "resource://siphon/modules/siphon.js" );
 		window.addEventListener( "load", function ( ) {
-			Siphon.updateStatusbars( )
+			Siphon.updateStatusbars()
 		}, false )
 	</script>
 

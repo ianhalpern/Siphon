@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://siphon/skin/main.css"?>
+
+<!DOCTYPE prefwindow SYSTEM "chrome://siphon/locale/siphon.dtd">
+
+<!--
+
++  Copyright (c) 2009 Ian Halpern
+@  http://siphon-fx.com
+
+   This file is part of Siphon.
+
+   Siphon is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   Siphon is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Siphon.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+
+<prefwindow
+  id="siphon-server-configuration"
+  title="&options.title;"
+  onunload="/*Siphon.settingsDialogClosed()*/"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+	<prefpane id="pane-settings" label="Siphon - Server Configuration" style="padding-bottom: 0; margin-bottom: 0;">
+
+		<preferences>
+			<preference id="pref-url" name="extensions.siphon.api_url" type="string" />
+		</preferences>
+
+		<groupbox style=" overflow: hidden">
+
+			<hbox>
+				<caption label="Server Settings" />
+			</hbox>
+			<vbox id="login-vbox">
+
+				<groupbox>
+					<hbox align="center">
+						<label style="width:100px" control="api-url" value="Api Url:"/>
+						<textbox id="api-url" preference="pref-url" />
+						<spacer flex="1" />
+					</hbox>
+				</groupbox>
+			</vbox>
+
+		</groupbox>
+		<vbox>
+			<label value="For information on the Siphon api and"/>
+			<label value="how to configure your own server visit"/>
+			<label class="text-link" value="http://siphon-fx.com/api-documentation/" href="http://siphon-fx.com/api-documentation/"/>
+		</vbox>
+	</prefpane>
+
+	<script>
+		Components.utils.import("resource://siphon/modules/siphon.js");
+	</script>
+
+	<script type="text/javascript">
+		//window.resizeTo( 300 )
+
+		window.addEventListener( "load", function() {
+		}, false )
+	</script>
+
+</prefwindow>
+

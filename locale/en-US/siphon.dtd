@@ -1,6 +1,7 @@
 <!ENTITY options.title "Siphon - Settings">
 <!ENTITY options.panemain.title "Settings">
-<!ENTITY options.panemain.caption "Account">
+<!ENTITY options.panemain.caption "Existing Account">
+<!ENTITY options.panemain.host "Host">
 <!ENTITY options.panemain.email "Email">
 <!ENTITY options.panemain.password "Password">
 <!ENTITY options.panemain.last_sync "Last Sync">
@@ -8,7 +9,7 @@
 <!ENTITY options.panemain.forgot_btn "Forgot Password?">
 
 <!ENTITY installer.title "Siphon - Installer">
-<!ENTITY installer.label "Addons to Install">
+<!ENTITY installer.label "Addons">
 
 <!ENTITY menu.sync "Synchronize">
 <!ENTITY menu.settings "Settings">

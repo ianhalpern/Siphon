@@ -29,26 +29,33 @@
 <prefwindow
   id="siphon-preferences"
   title="&options.title;"
-  onunload="Siphon.settingsDialogClosed( )"
+  onunload="Siphon.settingsDialogClosed()"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 	<prefpane id="pane-installer" label="Installer" style="padding-bottom: 0; margin-bottom: 0;">
 		<preferences></preferences>
 
-		<vbox style="height: 250px; width: 300px; overflow: hidden">
-		<hbox align="center" style="padding-bottom:10px">
-			<image src="chrome://siphon/content/icons/icon-32x32.png" />
-			<label value="&installer.label;" style="font-weight: bold; font-size: 14px;"/>
-		</hbox>
-
-		<richlistbox id="siphon_addon_listbox" style='overflow: auto; height: 200px;'>
-			<!--<richlistitem align="center">
-				<label class="addon-name" value="Firebug" style="font-weight: bold;" />
-				<label value="1.65" />
-				<spacer flex="1"/>
-				<button label="install"/>
-			</richlistitem>-->
-		</richlistbox>
+		<vbox style="">
+			<hbox align="center" style="padding-bottom:10px">
+				<image src="chrome://siphon/content/icons/icon-32x32.png" />
+				<label value="&installer.label;" style="font-weight: bold; font-size: 14px;"/>
+			</hbox>
+			<richlistbox id="siphon_addon_listbox" style='overflow: auto; height: 310px;'>
+				<richlistitem align="center">
+					<label id="siphon_addon_listbox_loading" value="Loading..." style="font-weight: bold;" />
+				</richlistitem>
+			</richlistbox>
+			<hbox align="center">
+				<button id="sync-btn" label="&options.panemain.sync_btn;" oncommand="SiphonInstaller.onSyncCommand()"/>
+				<label value="&options.panemain.last_sync;:"/>
+				<label id="last-sync" value=""/>
+				<vbox>
+					<image id="throbber" style="visibility:hidden;width:16px;height:16px;" src="chrome://siphon/content/throbber/throbber.png" />
+				</vbox>
+				<button id="sync-stop-btn" style="visibility:hidden;" label="Stop"
+					oncommand="SiphonInstaller.onSyncStopCommand()"/>
+				<spacer flex="1" />
+			</hbox>
 		</vbox>
 	</prefpane>
 
@@ -59,114 +66,110 @@
 			<preference id="pref-password" name="extensions.siphon.password" type="string" />
 		</preferences>
 
-		<groupbox style="height: 250px; width: 300px; overflow: hidden">
-			<vbox>
-				<caption label="Status" />
-					<groupbox>
-							<box>
-								<box id="status-uninstalled-icon" class="icon-alert" align="center" pack="center"></box>
-								<label id="status-uninstalled-label"/>
-							</box>
-							<box>
-								<box class="icon-attention" align="center" pack="center"></box>
-								<label id="status-installed-label" value=""/>
-							</box>
-					</groupbox>
-			</vbox>
+		<groupbox style=" overflow: hidden">
+			<hbox>
+				<caption label="Server" />
+			</hbox>
+			<groupbox>
+				<hbox align="center">
+					<label class="text-link" id="server-settings-label" value=""/>
+					<button label="Configure" oncommand="SiphonSettings.onServerConfigureCommand()"/>
+					<spacer flex="1" />
+				</hbox>
+			</groupbox>
 
 			<hbox>
-				<caption label="&options.panemain.caption; @ " />
-				<label value="siphon-fx.com" class="text-link" href="http://siphon-fx.com" style="padding: 0; margin: 0; margin-top: -1px" />
+				<caption label="&options.panemain.caption;" />
 			</hbox>
-
-			<vbox id="login-vbox" style='height: 130px;'>
+			<vbox id="login-vbox">
 
 				<groupbox>
 					<hbox align="center">
-						<label control="l-email" value="&options.panemain.email;:"/>
-						<spacer flex="1" />
+						<label style="width:100px" control="l-email" value="&options.panemain.email;:"/>
 						<textbox id="l-email" preference="pref-email" />
+						<spacer flex="1" />
 					</hbox>
 					<hbox align="center">
-						<label control="l-password" value="&options.panemain.password;:"/>
-						<spacer flex="1" />
+						<label style="width:100px" control="l-password" value="&options.panemain.password;:"/>
 						<textbox id="l-password" type="password" preference="pref-password" />
+						<spacer flex="1" />
 					</hbox>
 				</groupbox>
 
 				<hbox align="center">
-					<button id="sync-btn" label="&options.panemain.sync_btn;" oncommand="SiphonSettings.onSyncCommand()"/>
-					<button id="show-sign-up-btn" label="Sign Up" oncommand="SiphonSettings.openSignup( )" />
+					<button id="show-sign-up-btn" label="Synchronize" oncommand="SiphonSettings.onSyncCommand()" />
 					<button id="forgot-btn" label="&options.panemain.forgot_btn;" oncommand="SiphonSettings.onForgotCommand()" />
 				</hbox>
 				<separator />
-				<hbox align="center">
-					<label value="&options.panemain.last_sync;:"/>
-					<label id="last-sync" value=""/>
-					<spacer flex="1" />
-					<image id="throbber" style="visibility:hidden;" src="chrome://siphon/content/throbber/throbber.png" />
-					<spacer flex="1" />
-					<button id="sync-stop-btn" style="visibility:hidden;" label="Stop"
-						oncommand="SiphonSettings.onSyncStopCommand()"/>
-				</hbox>
 			</vbox>
+
+			<hbox>
+				<caption label="Create Account" />
+			</hbox>
 
 			<vbox id="signup-vbox" style="height: 130px;">
 				<groupbox>
 					<hbox align="center">
-						<label control="s-email" value="Email:"/>
-						<spacer flex="1" />
+						<label style="width:100px" control="s-email" value="Email:"/>
 						<textbox id="s-email" onchange="SiphonSettings.onSignUpChange()"
 						oninput="SiphonSettings.onSignUpChange()"/>
 						<hbox id="s-email-validate" class="invalid"></hbox>
+						<spacer flex="1" />
 					</hbox>
 					<hbox align="center">
-						<label control="s-password" value="Password:"/>
-						<spacer flex="1" />
+						<label style="width:100px" control="s-password" value="Password:"/>
 						<textbox id="s-password" type="password"
 						onchange="SiphonSettings.onSignUpChange()"
 						oninput="SiphonSettings.onSignUpChange()"/>
 						<hbox id="s-password-validate" class="invalid"></hbox>
+						<spacer flex="1" />
 					</hbox>
 					<hbox align="center">
-						<label control="r-password" value="Retype:"/>
-						<spacer flex="1" />
+						<label style="width:100px" control="r-password" value="Retype:"/>
 						<textbox id="r-password" type="password" onchange="SiphonSettings.onSignUpChange()"
 						oninput="SiphonSettings.onSignUpChange()"/>
 						<hbox id="r-password-validate" class="invalid"></hbox>
+						<spacer flex="1" />
 					</hbox>
 				</groupbox>
 
-				<separator />
 				<hbox align="center">
 					<button id="sign-up-btn" label="Sign Up" disabled="true" oncommand="SiphonSettings.onSignUpCommand()"/>
 					<image id="throbber-sign-up" style="display:none;" src="chrome://siphon/content/throbber/throbber.png" />
 					<button id="stop-sign-up-btn" label="Stop" style="display:none;" oncommand="SiphonSettings.onSignUpStopCommand()"/>
-					<button label="Use an existing account." id="close-sign-up-btn" oncommand="SiphonSettings.closeSignup( )"/>
 				</hbox>
 			</vbox>
 
-			<hbox> <label id="alert-status" value="" style="color:red;font-weight:bold;"/></hbox>
 		</groupbox>
 	</prefpane>
+	<vbox style="width:580px;overflow:hidden">
+		<separator class="groove" style="width:3px;padding:0;margin:0"/>
+		<hbox>
+			<label id="alert-status" value="" style="color:red;font-weight:bold;"/>
+			<spacer flex="1" />
+		</hbox>
+	</vbox>
 
 	<script>
 		Components.utils.import("resource://siphon/modules/siphon.js");
 	</script>
 
-	<script src="options.js" />
+	<script type="text/javascript" src="options.js"></script>
 
 	<script type="text/javascript">
-
 		var siphonResize = function ( ) {
-			window.resizeTo( 400, 390 )
+			window.resizeTo( 580, 540 )
 		}
 
-		window.addEventListener( "load", function( ) {
-			siphonResize( )
-			SiphonSettings.init( )
-			SiphonInstaller.init( )
-			SiphonSettings.closeSignup( )
+		window.addEventListener( "load", function() {
+			try {
+				siphonResize()
+				SiphonSettings.init()
+				SiphonInstaller.init()
+			//	SiphonSettings.closeSignup()
+			} catch ( e ) {
+				alert( e )
+			}
 		}, false )
 
 	</script>

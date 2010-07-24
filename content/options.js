@@ -21,50 +21,41 @@
 
 var SiphonSettings = {
 
-	init: function( ) {
-		this.draw( )
+	init: function() {
+		this.draw()
 	},
 
-	draw: function ( ) {
+	draw: function() {
 		document.getElementById( "last-sync" ).setAttribute( "value", Siphon.prefs.getCharPref( "last_sync" ) || "Not synced yet." )
-		this.updateStatus( )
+		var api_url = Siphon.prefs.getCharPref( "api_url" )
+		var i = api_url.indexOf( '//' )
+		var j = api_url.substr( i+2 ).indexOf( '/' )
+		document.getElementById( "server-settings-label" ).setAttribute( "value", api_url.substr( 0, i + 2 + j ) )
+		document.getElementById( "server-settings-label" ).setAttribute( "href", api_url.substr( 0, i + 2 + j ) )
+		//this.updateStatus()
 	},
 
-	redraw: function ( ) {
-		this.draw( )
-	},
-
-	setSyncingUI: function() {
-		this.disableMainButtons( )
-		document.getElementById("throbber").style.visibility = "visible"
-		document.getElementById("sync-stop-btn").style.visibility = "visible"
-	},
-
-	setSyncStoppedUI: function() {
-		document.getElementById("throbber").style.visibility = "hidden"
-		document.getElementById("sync-stop-btn").style.visibility = "hidden"
-		document.getElementById("last-sync").setAttribute("value", Siphon.prefs.getCharPref("last_sync"))
-		this.enableMainButtons( )
+	redraw: function() {
+		this.draw()
 	},
 
 	setLogginFailedUI: function() {
-		this.alertSyncStatus("Login Failed")
+		//this.alertSyncStatus("Login Failed")
 	},
 
 	setSignUpSucceededUI: function() {
 		this.clearSignUpUI()
 		this.setSignedUpUI()
-		this.alertSignupStatus("Signup Successed")
+		//this.alertSignupStatus("Signup Successed")
 	},
 
 	setSignUpFailedUI: function() {
 		this.setSignedUpUI()
-		this.alertSignupStatus("Signup Failed")
+		//this.alertSignupStatus("Signup Failed")
 	},
 
 	setSignUpableUI: function() {
 		document.getElementById("sign-up-btn").disabled = false
-		document.getElementById("close-sign-up-btn").disabled = false
 	},
 
 	setUnsignUpableUI: function() {
@@ -75,7 +66,6 @@ var SiphonSettings = {
 		document.getElementById("throbber-sign-up").style.display = "block"
 		document.getElementById("stop-sign-up-btn").style.display = "block"
 		document.getElementById("sign-up-btn").style.display = "none"
-		document.getElementById("close-sign-up-btn").disabled =
 		document.getElementById("s-email").disabled =
 		document.getElementById("s-password").disabled =
 		document.getElementById("r-password").disabled = true
@@ -85,7 +75,6 @@ var SiphonSettings = {
 		document.getElementById("throbber-sign-up").style.display = "none"
 		document.getElementById("stop-sign-up-btn").style.display = "none"
 		document.getElementById("sign-up-btn").style.display = "block"
-		document.getElementById("close-sign-up-btn").disabled =
 		document.getElementById("s-email").disabled =
 		document.getElementById("s-password").disabled =
 		document.getElementById("r-password").disabled = false
@@ -96,13 +85,13 @@ var SiphonSettings = {
 			this.setUnsignUpableUI()
 	},
 
-	disableMainButtons: function ( ) {
+	disableMainButtons: function() {
 		document.getElementById("sync-btn").disabled =
 		document.getElementById("show-sign-up-btn").disabled =
 		document.getElementById("forgot-btn").disabled = true
 	},
 
-	enableMainButtons: function ( ) {
+	enableMainButtons: function() {
 		document.getElementById("sync-btn").disabled =
 		document.getElementById("show-sign-up-btn").disabled =
 		document.getElementById("forgot-btn").disabled = false
@@ -114,18 +103,18 @@ var SiphonSettings = {
 		document.getElementById("r-password").value = ""
 	},
 
-	alertSyncStatus: function (message) {
-		this.alertStatus("alert-status", message)
+	alertSyncStatus: function(message) {
+		this.alertStatus(message)
 	},
 
-	alertSignupStatus: function (message) {
-		this.alertStatus("alert-status", message)
+	alertSignupStatus: function(message) {
+		this.alertStatus(message)
 	},
 
-	alertStatus: function (el_id, message) {
-		document.getElementById(el_id).setAttribute("value", message)
+	alertStatus: function(message) {
+		document.getElementById("alert-status").setAttribute("value", message)
 		setTimeout(function() {
-			document.getElementById(el_id).setAttribute("value", "")
+			document.getElementById("alert-status").setAttribute("value", "")
 		}, 1500);
 	},
 
@@ -170,16 +159,16 @@ var SiphonSettings = {
 		)
 	},
 
-	updateStatus: function ( ) {
+	/*updateStatus: function() {
 		if ( Siphon.invalid_account ) {
 			document.getElementById( "status-uninstalled-icon" ).className = "icon-alert"
 			document.getElementById( "status-uninstalled-label" ).value = "Account invalid. Please login or sign up."
-		} else if ( Siphon.nUninstalledAddons( ) ) {
+		} else if ( Siphon.nUninstalledAddons() ) {
 			document.getElementById( "status-uninstalled-icon" ).className = "icon-alert"
 			document.getElementById( "status-uninstalled-label" ).value =
-			  Siphon.nUninstalledAddons( ) +
-			  " addon" + ( Siphon.nUninstalledAddons( ) != 1 ? "s" : "" ) +
-			  " need" + ( Siphon.nUninstalledAddons( ) != 1 ? "" : "s" ) +
+			  Siphon.nUninstalledAddons() +
+			  " addon" + ( Siphon.nUninstalledAddons() != 1 ? "s" : "" ) +
+			  " need" + ( Siphon.nUninstalledAddons() != 1 ? "" : "s" ) +
 			  " to be installed."
 		} else {
 			document.getElementById( "status-uninstalled-icon" ).className = "icon-success"
@@ -187,58 +176,28 @@ var SiphonSettings = {
 		}
 
 		document.getElementById( "status-installed-label" ).value =
-		  Siphon.em.getItemList( 2, [ ] ).length +
-		  " addon" + ( Siphon.em.getItemList( 2, [ ] ).length != 1 ? "s" : "" ) +
+		  Siphon.em.getItemList( 2, [] ).length +
+		  " addon" + ( Siphon.em.getItemList( 2, [] ).length != 1 ? "s" : "" ) +
 		  " installed, " +
 		  Siphon.ignored_addons.length + 
 		  " addon" + ( Siphon.ignored_addons.length != 1 ? "s" : "" ) +
 		  " ignored."
-	},
+	},*/
 
-	openSignup: function ( ) {
+	/*openSignup: function() {
 		document.getElementById( "login-vbox" ).style.display = "none"
 		document.getElementById( "signup-vbox" ).style.display = "block"
 	},
 
-	closeSignup: function ( ) {
+	closeSignup: function() {
 		document.getElementById( "login-vbox" ).style.display = "block"
 		document.getElementById( "signup-vbox" ).style.display = "none"
-	},
+	},*/
 
-	onSyncCommand: function() {
-		Siphon.prefs.setCharPref( "email", document.getElementById("l-email").value )
-		Siphon.prefs.setCharPref( "password", document.getElementById("l-password").value )
-		this.setSyncingUI()
-		try {
-		Siphon.synchronize(
-			function(retval){SiphonSettings.onSyncSucceeded(retval)},
-			function(retval){SiphonSettings.onSyncFailed(retval)}
-		)
-		} catch ( e ) { alert ( e ) }
-	},
-
-	onSyncStopCommand: function() {
-		this.setSyncStoppedUI()
-		Siphon.abortSync()
-	},
-
-	onSyncSucceeded: function ( retval ) {
-		this.setSyncStoppedUI()
-		this.alertSyncStatus( "Synchronize Succeeded" )
-	},
-
-	onSyncFailed: function ( retval ) {
-		this.setSyncStoppedUI()
-		if ( retval == 0 )
-			this.alertSyncStatus( "Login Failed" )
-		else
-			this.alertSyncStatus( "Synchronize Failed" )
-	},
-
-	onForgotCommand: function( ) {
+	onForgotCommand: function() {
 		var $this = this
-		Siphon.onForgotCommand( function ( ) {
-			$this.alertSyncStatus( "You have been sent an email." )
+		Siphon.onForgotCommand( function() {
+			//$this.alertSyncStatus( "You have been sent an email." )
 		} )
 	},
 
@@ -250,13 +209,17 @@ var SiphonSettings = {
 	},
 
 	onSignUpCommand: function() {
-		this.setSigningUpUI()
-		this.validateSignUpInfo(
-			function(){
-				SiphonSettings.onSignUpSucceeded( );
-				SiphonSettings.setSignUpSucceededUI(); },
-			function(){SiphonSettings.setSignUpFailedUI()}
-		)
+		try {
+			this.setSigningUpUI()
+			this.validateSignUpInfo(
+				function(){
+					SiphonSettings.onSignUpSucceeded();
+					SiphonSettings.setSignUpSucceededUI(); },
+				function(){SiphonSettings.setSignUpFailedUI()}
+			)
+		} catch(e) {
+			alert(e)
+		}
 	},
 
 	onSignUpStopCommand: function() {
@@ -264,56 +227,92 @@ var SiphonSettings = {
 		Siphon.abortSignup()
 	},
 
-	onSignUpSucceeded: function ( ) {
+	onSignUpSucceeded: function() {
 		try {
-		Siphon.resetPrefs( )
-		Siphon.unsetFirstRun( )
+		Siphon.resetPrefs()
+		Siphon.unsetFirstRun()
 		Siphon.prefs.setCharPref( "email", document.getElementById("s-email").value )
 		Siphon.prefs.setCharPref( "password", document.getElementById("s-password").value )
 
-		this.setSignUpSucceededUI( )
+		this.setSignUpSucceededUI()
 
-		var $this = this
+		/*var $this = this
 
-		setTimeout( function ( ) {
+		setTimeout( function() {
 			try {
-				$this.closeSignup( )
-				$this.onSyncCommand( )
+				$this.closeSignup()
+				$this.onSyncCommand()
 			} catch ( e ) { alert ( e ) }
-		}, 1000 )
+		}, 1000 )*/
 		} catch ( e ) { alert( e ) }
+	},
+
+	onSyncCommand: function() {
+		SiphonInstaller.onSyncCommand()
+		document.documentElement.showPane( document.getElementById( 'pane-installer' ) )
+	},
+
+	onServerConfigureCommand: function() {
+		var features = "chrome,titlebar,centerscreen,resizable"
+		var win = window.openDialog( "chrome://siphon/content/server-configuration.xul", "Siphon Server Configuration", features )
+		win.addEventListener( "unload", function() {
+			SiphonSettings.redraw()
+		}, false )
 	}
 }
 
 var SiphonInstaller = {
 
-	init: function ( ) {
-		this.draw( )
+	init: function() {
+		this.draw()
 	},
 
-	draw: function ( ) {
-		for ( var i = 0; i < Siphon.uninstalled_addons.length; i++ ) {
-			document.getElementById('siphon_addon_listbox').appendChild(
-				this.createAddonListitem(
-					Siphon.uninstalled_addons[ i ].name,
-					//Siphon.uninstalled_addons[ i ].version,
-					Siphon.uninstalled_addons[ i ].id
+	draw: function() {
+		var found = false
+		var sorted_addons = [ [], [], [], [], [] ]
+		var used_addons = {}
+		for ( var i = 0; i < Siphon.new_addons.length; i++ ) {
+			sorted_addons[ 4 ].push( Siphon.new_addons[i] )
+			used_addons[ Siphon.new_addons[i] ] = true
+		}
+		for ( var guid in Siphon.addon_status ) {
+			if ( !used_addons[ guid ] ) {
+				sorted_addons[ Siphon.addon_status[guid] - 1 ].push( guid )
+			}
+			found = true
+		}
+
+		if ( found ) {
+			Siphon.new_addons = []
+			this.clear()
+		}
+
+		for ( var i = sorted_addons.length - 1; i >= 0; i-- ) {
+			for ( var j = 0; j < sorted_addons[i].length; j++ ) {
+				var guid = sorted_addons[i][j]
+				document.getElementById('siphon_addon_listbox').appendChild(
+					this.createAddonListitem(
+						Siphon.addons[ guid ].name,
+						//Siphon.uninstalled_addons[ i ].version,
+						Siphon.addons[ guid ].id,
+						i == sorted_addons.length - 1
+					)
 				)
-			)
+			}
 		}
 	},
 
-	clear: function ( ) {
-		while ( document.getElementById( 'siphon_addon_listbox' ).hasChildNodes( ) )
+	clear: function() {
+		while ( document.getElementById( 'siphon_addon_listbox' ).hasChildNodes() )
 			document.getElementById( 'siphon_addon_listbox' ).removeChild( document.getElementById( 'siphon_addon_listbox' ).childNodes[ 0 ] )
 	},
 
-	redraw: function ( ) {
-		this.clear( )
-		this.draw( )
+	redraw: function() {
+		this.clear()
+		this.draw()
 	},
 
-	createAddonListitem: function ( name, /*version,*/ guid ) {
+	createAddonListitem: function( name, guid, is_new ) {
 
 		var list_item = document.createElement( 'richlistitem' )
 		list_item.setAttribute( "align", "center" )
@@ -324,12 +323,15 @@ var SiphonInstaller = {
 		list_item.appendChild( icon )
 
 		var name_box = document.createElement( "box" )
-		name_box.setAttribute( "style", "overflow:hidden; width: 160px; whitespace: nowrap" )
+		name_box.setAttribute( "style", "overflow:hidden; width: 200px; whitespace: nowrap" )
 		list_item.appendChild( name_box )
 
 		var addon_name = document.createElement( 'label' )
 		addon_name.setAttribute( "class", "addon_name" )
 		addon_name.setAttribute( "value", name )
+		if ( is_new ) {
+			list_item.style.background = '#FFFF66'
+		}
 		name_box.appendChild( addon_name )
 
 		//var version_box = document.createElement( "box" )
@@ -344,43 +346,107 @@ var SiphonInstaller = {
 		spacer.setAttribute( "flex", "1" )
 		list_item.appendChild( spacer )
 
-		var onChecked = function ( ) {
+		var onChecked = function() {
 			if ( checkbox.getAttribute( "checked" ) ) {
-				install_btn.setAttribute( "disabled", "true" )
-				Siphon.ignoreAddon( guid )
+				if ( Siphon.addon_status[ guid ] == Siphon.STAT_NOT_INSTALLED ) {
+					install_btn.setAttribute( "disabled", "true" )
+					Siphon.ignoreAddon( guid )
+				} else if ( Siphon.addon_status[ guid ] == Siphon.STAT_INSTALLED_NO_SYNC )
+					Siphon.syncAddon( guid )
 			} else {
-				Siphon.unignoreAddon( guid )
-				install_btn.setAttribute( "disabled", "false" )
+				if ( Siphon.addon_status[ guid ] == Siphon.STAT_NOT_INSTALLED_IGNORED ) {
+					Siphon.unignoreAddon( guid )
+					install_btn.setAttribute( "disabled", "false" )
+				} else if ( Siphon.addon_status[ guid ] == Siphon.STAT_INSTALLED )
+					Siphon.unsyncAddon( guid )
 			}
-			SiphonSettings.updateStatus( )
+			//SiphonSettings.updateStatus()
 		}
 
 		var checkbox = document.createElement( 'checkbox' )
-		checkbox.setAttribute( "label", "Ignore" )
 
 		checkbox.addEventListener( "command", onChecked, false )
 
 		list_item.appendChild( checkbox )
 
 		var install_btn = document.createElement( 'button' )
-		install_btn.setAttribute( "label", "install" )
-		//install_btn.setAttribute("disabled", "true")
-		install_btn.addEventListener( "command", function ( e ) {
+
+		if ( Siphon.addon_status[ guid ] == Siphon.STAT_INSTALLED || Siphon.addon_status[ guid ] == Siphon.STAT_INSTALLED_NO_SYNC ) {
+			install_btn.setAttribute( "label", "Installed" )
 			install_btn.setAttribute( "disabled", "true" )
-			checkbox.setAttribute( "disabled", "true" )
-			//install_btn.setAttribute( "label", "restart" )
+			checkbox.setAttribute( "label", "Sync" )
+		} else {
+			install_btn.setAttribute( "label", "Install" )
+			checkbox.setAttribute( "label", "Ignore" )
+		}
+		//install_btn.setAttribute("disabled", "true")
+		install_btn.addEventListener( "command", function( e ) {
 			Siphon.onGetAddonCommand( guid )
-			//window.close( )
+			install_btn.setAttribute( "disabled", "true" )
+			install_btn.setAttribute( "label", "Installing" )
+			checkbox.setAttribute( "disabled", true )
+			//install_btn.setAttribute( "label", "restart" )
+			//window.close()
 		}, false )
 
 		list_item.appendChild( install_btn )
 
-		if ( Siphon.isAddonIgnored( guid ) ) {
+		var delete_btn = document.createElement( 'button' )
+		delete_btn.setAttribute( "label", "Delete" )
+		delete_btn.addEventListener( "command", function( e ) {
+			Siphon.deleteAddon( guid )
+			list_item.remove()
+		}, false )
+
+		list_item.appendChild( delete_btn )
+
+		if ( Siphon.addon_status[ guid ] == Siphon.STAT_NOT_INSTALLED_IGNORED || Siphon.addon_status[ guid ] == Siphon.STAT_INSTALLED )
 			checkbox.setAttribute( "checked", true )
-			onChecked( )
-		}
 
 		return list_item
+	},
+
+	setSyncingUI: function() {
+		document.getElementById("throbber").style.visibility = "visible"
+		document.getElementById("sync-stop-btn").style.visibility = "visible"
+		document.getElementById("sync-btn").setAttribute("disabled", true)
+	},
+
+	setSyncStoppedUI: function() {
+		document.getElementById("throbber").style.visibility = "hidden"
+		document.getElementById("sync-stop-btn").style.visibility = "hidden"
+		document.getElementById("last-sync").setAttribute("value", Siphon.prefs.getCharPref("last_sync"))
+		document.getElementById("sync-btn").setAttribute("disabled", false)
+	},
+
+	onSyncCommand: function() {
+		try {
+			Siphon.prefs.setCharPref( "email", document.getElementById("l-email").value )
+			Siphon.prefs.setCharPref( "password", document.getElementById("l-password").value )
+			this.setSyncingUI()
+			Siphon.synchronize(
+				function(retval){SiphonInstaller.onSyncSucceeded(retval)},
+				function(retval){SiphonInstaller.onSyncFailed(retval)}
+			)
+		} catch ( e ) { alert ( e ) }
+	},
+
+	onSyncStopCommand: function() {
+		this.setSyncStoppedUI()
+		Siphon.abortSync()
+	},
+
+	onSyncSucceeded: function( retval ) {
+		this.setSyncStoppedUI()
+	//	this.alertSyncStatus( "Synchronize Succeeded" )
+	},
+
+	onSyncFailed: function( retval ) {
+		this.setSyncStoppedUI()
+		//if ( retval == 0 )
+		//	this.alertSyncStatus( "Login Failed" )
+		//else
+		//	this.alertSyncStatus( "Synchronize Failed" )
 	}
 
 }
