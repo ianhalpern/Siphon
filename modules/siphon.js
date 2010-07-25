@@ -312,6 +312,7 @@ var Siphon = {
 
 					if ( this.addon_status[ guid ] == this.STAT_NOT_INSTALLED_IGNORED || this.addon_status[ guid ] == this.STAT_NOT_INSTALLED ) {
 						if ( !addon_mode[ guid ] && json.addons[guid] ) addon_mode[ guid ] += 1
+						else if ( addon_mode[ guid ] ) addon_mode[ guid ] -= 2
 					}
 					addon_mode[ guid ] += 2
 
