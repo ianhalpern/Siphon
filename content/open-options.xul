@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!-- Extremely recommended to keep this css include!! -->
+<window id="rootWnd" title=""
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+	<script>
+		Components.utils.import("resource://siphon/modules/siphon.js");
+		Siphon.openSettingsDialog()
+		window.close()
+	</script>
+</window>

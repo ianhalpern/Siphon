@@ -27,7 +27,7 @@ rdf = """<?xml version="1.0"?>
 		<em:aboutURL>chrome://sampleext/content/about.xul</em:aboutURL>
 		<em:updateURL>http://sampleextension.mozdev.org/update.rdf</em:updateURL-->
 		<em:iconURL>chrome://siphon/content/icons/icon-32x32.png</em:iconURL>
-		<em:optionsURL>chrome://siphon/content/options.xul</em:optionsURL>
+		<em:optionsURL>chrome://siphon/content/open-options.xul</em:optionsURL>
 
 
 		<!-- Firefox -->
