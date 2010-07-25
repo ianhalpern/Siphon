@@ -311,8 +311,7 @@ var Siphon = {
 					if ( !addon_mode[ guid ] ) addon_mode[ guid ] = 0
 
 					if ( this.addon_status[ guid ] == this.STAT_NOT_INSTALLED_IGNORED || this.addon_status[ guid ] == this.STAT_NOT_INSTALLED ) {
-						if ( !addon_mode[ guid ] ) addon_mode[ guid ] += 1
-						else addon_mode[ guid ] -= 2
+						if ( !addon_mode[ guid ] && json.addons[guid] ) addon_mode[ guid ] += 1
 					}
 					addon_mode[ guid ] += 2
 
@@ -331,6 +330,18 @@ var Siphon = {
 				}
 				this.console.logStringMessage("sync get: " + n )
 
+				/*     | 1  2  3  |
+				 *     |--------------
+				 *  0  | 0  0  0  |  0
+				 *  1  | 1  0  0  |  1
+				 *  2  | 0  1  0  |  0
+				 *  3  | 1  1  0  |  0
+				 *  4  | 0  0  1  |  1
+				 *  5  | 1  0  1  |  1
+				 *  6  | 0  1  1  |  0
+				 *  7  | 1  1  1  |  1
+				 *
+				 */
 				for ( var guid in addon_mode ) {
 					this.console.logStringMessage( guid + ' ' + addon_mode[ guid ] )
 					switch( addon_mode[ guid ] ) {
@@ -339,10 +350,10 @@ var Siphon = {
 							this.addon_status[ guid ] = this.STAT_INSTALLED
 							this.console.logStringMessage( guid + ' installed' )
 							break
-						case 2:
 						case 3:
 							this.em.uninstallItem( guid )
 							this.deleted_addons[guid] = true
+						case 2:
 						case 6:
 							delete this.addon_status[ guid ]
 							this.console.logStringMessage( guid + ' deleted' )
