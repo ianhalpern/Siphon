@@ -88,18 +88,15 @@ var Siphon = {
 
 	// Events
 	init: function() {
+		this.console.logStringMessage( 'init' )
 
 		this.addon_status = {}
+		this.deleted_addons = {}
 		this.addons = {}
 		this.new_addons = []
 
 		this.synchronize()
-		this.startPeriodicSynchronizer( 10 )
-
-		if ( this.prefs.getBoolPref( 'first_run' ) ) {
-			this.unsetFirstRun()
-			this.openSettingsDialog( 'pane-settings' )
-		}
+		this.startPeriodicSynchronizer()
 
 	},
 
@@ -107,19 +104,20 @@ var Siphon = {
 		return this.prefs.getCharPref( 'api_url' )
 	},
 
-	startPeriodicSynchronizer: function( minutes ) {
+	startPeriodicSynchronizer: function() {
 		var $this = this
 
 		var event = { notify: function() {
+			$this.console.logStringMessage( 'periodic synchronize' )
 			$this.synchronize()
 		} }
 
-		var timer = Components.classes[ "@mozilla.org/timer;1" ]
+		this.timer = Components.classes[ "@mozilla.org/timer;1" ]
 		  .createInstance( Components.interfaces.nsITimer )
 
-		timer.initWithCallback(
+		this.timer.initWithCallback(
 			event,
-			minutes * 60 * 1000,
+			this.prefs.getIntPref( 'sync_interval_minutes' ) * 60 * 1000,
 			Components.interfaces.nsITimer.TYPE_REPEATING_SLACK
 		)
 
@@ -200,10 +198,12 @@ var Siphon = {
 
 			win.openUILinkIn( xpi_url, 'current' )
 
-			$this.addon_status[ guid ] = $this.STAT_INSTALLED
-			$this.prefs.setCharPref( 'addon_status', JSON.encode( $this.addon_status ) )
-			$this._syncronize_set()
-			$this.updateStatusbars()
+			if ( options_window )
+				options_window.SiphonInstaller.onInstallWindowOpened( guid )
+			//$this.addon_status[ guid ] = $this.STAT_INSTALLED
+			//$this.prefs.setCharPref( 'addon_status', JSON.encode( $this.addon_status ) )
+			//$this.syncronize()
+			//$this.updateStatusbars()
 		} )
 
 	},
@@ -237,6 +237,7 @@ var Siphon = {
 		if ( this.addon_status[ guid ] == this.STAT_INSTALLED ) {
 			try {
 				this.em.uninstallItem( guid )
+				Siphon.deleted_addons[guid] = true
 			} catch ( e ) {}
 		}
 		delete this.addon_status[ guid ]
@@ -300,16 +301,19 @@ var Siphon = {
 
 				var addon_mode = {}
 				for ( var i = 0; i < installed_addons.length; i++ ) {
-					addon_mode[ installed_addons[ i ].id ] = 1
-					this.addons[ installed_addons[ i ].id ] = installed_addons[ i ]
+					if ( !this.deleted_addons[ installed_addons[ i ].id] ) {
+						addon_mode[ installed_addons[ i ].id ] = 1
+						this.addons[ installed_addons[ i ].id ] = installed_addons[ i ]
+					}
 				}
 
 				for ( var guid in this.addon_status ) {
 					if ( !addon_mode[ guid ] ) addon_mode[ guid ] = 0
 
-					if ( this.addon_status[ guid ] == this.STAT_NOT_INSTALLED_IGNORED || this.addon_status[ guid ] == this.STAT_NOT_INSTALLED )
+					if ( this.addon_status[ guid ] == this.STAT_NOT_INSTALLED_IGNORED || this.addon_status[ guid ] == this.STAT_NOT_INSTALLED ) {
 						if ( !addon_mode[ guid ] ) addon_mode[ guid ] += 1
 						else addon_mode[ guid ] -= 2
+					}
 					addon_mode[ guid ] += 2
 
 					if ( this.addon_status[ guid ] == this.STAT_INSTALLED_NO_SYNC )
@@ -336,8 +340,10 @@ var Siphon = {
 							this.console.logStringMessage( guid + ' installed' )
 							break
 						case 2:
-						case 6:
+						case 3:
 							this.em.uninstallItem( guid )
+							this.deleted_addons[guid] = true
+						case 6:
 							delete this.addon_status[ guid ]
 							this.console.logStringMessage( guid + ' deleted' )
 							break
@@ -422,6 +428,11 @@ var Siphon = {
 				options.onFail.call( $this, json || {} )
 			}
 
+			if ( $this.prefs.getBoolPref( 'first_run' ) ) {
+				$this.unsetFirstRun()
+				$this.openSettingsDialog( 'pane-settings' )
+			}
+
 		} )
 
 	},
@@ -439,9 +450,9 @@ var Siphon = {
 				options_window.addEventListener( "load", function( e ) {
 					options_window.document.documentElement.showPane( options_window.document.getElementById( pane_id ) )
 				}, false )
-		} else {
-			options_window.focus() //bringToFront
 		}
+
+		options_window.focus() //bringToFront
 	},
 
 	settingsDialogClosed: function() {

@@ -145,7 +145,7 @@
 	<vbox style="width:580px;overflow:hidden">
 		<separator class="groove" style="width:3px;padding:0;margin:0"/>
 		<hbox>
-			<label id="alert-status" value="" style="color:red;font-weight:bold;"/>
+			<label id="alert-status" value=""/>
 			<spacer flex="1" />
 		</hbox>
 	</vbox>

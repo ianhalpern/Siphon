@@ -66,6 +66,9 @@
 	-moz-image-region: rect(0px, 32px,  32px, 0px)
 }
 
+.new_addon {
+	background: #FFFF66;
+}
 /*#BrowserPreferences radio[pane=paneSecurity] {
   list-style-image: url("chrome://browser/skin/preferences/Options.png");
   -moz-image-region: rect(0px, 192px,  32px, 160px)

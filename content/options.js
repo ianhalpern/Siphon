@@ -118,6 +118,10 @@ var SiphonSettings = {
 		}, 1500);
 	},
 
+	setStatus: function(message) {
+		document.getElementById("alert-status").setAttribute("value", message)
+	},
+
 	validateLogInText: function() {
 		if (document.getElementById("l-email").value.match(/^..*@..*\...*$/)
 		 && document.getElementById("l-password").value )
@@ -229,8 +233,13 @@ var SiphonSettings = {
 
 	onSignUpSucceeded: function() {
 		try {
-		Siphon.resetPrefs()
-		Siphon.unsetFirstRun()
+		//Siphon.resetPrefs()
+		if ( Siphon.prefs.getCharPref( 'addon_status' ) )
+			Siphon.prefs.clearUserPref( 'addon_status' )
+
+		if ( Siphon.prefs.getCharPref( 'last_sync' ) )
+			Siphon.prefs.clearUserPref( 'last_sync' )
+		//Siphon.unsetFirstRun()
 		Siphon.prefs.setCharPref( "email", document.getElementById("s-email").value )
 		Siphon.prefs.setCharPref( "password", document.getElementById("s-password").value )
 
@@ -262,6 +271,8 @@ var SiphonSettings = {
 }
 
 var SiphonInstaller = {
+
+	installing: {},
 
 	init: function() {
 		this.draw()
@@ -317,6 +328,12 @@ var SiphonInstaller = {
 		var list_item = document.createElement( 'richlistitem' )
 		list_item.setAttribute( "align", "center" )
 		list_item.setAttribute( "id", guid )
+		if ( is_new ) {
+			list_item.setAttribute( "class", "new_addon" )
+			list_item.addEventListener( "click", function() {
+				list_item.setAttribute( "class", "" )
+			}, false )
+		}
 
 		var icon = document.createElement( "image" )
 		icon.setAttribute( "src", "chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png" )
@@ -329,9 +346,6 @@ var SiphonInstaller = {
 		var addon_name = document.createElement( 'label' )
 		addon_name.setAttribute( "class", "addon_name" )
 		addon_name.setAttribute( "value", name )
-		if ( is_new ) {
-			list_item.style.background = '#FFFF66'
-		}
 		name_box.appendChild( addon_name )
 
 		//var version_box = document.createElement( "box" )
@@ -345,6 +359,11 @@ var SiphonInstaller = {
 		var spacer = document.createElement( 'spacer' )
 		spacer.setAttribute( "flex", "1" )
 		list_item.appendChild( spacer )
+
+		var throbber = document.createElement( 'image' )
+		throbber.style.visibility = 'hidden'
+		throbber.setAttribute( 'src', "chrome://siphon/content/throbber/throbber.png" )
+		list_item.appendChild( throbber )
 
 		var onChecked = function() {
 			if ( checkbox.getAttribute( "checked" ) ) {
@@ -385,6 +404,13 @@ var SiphonInstaller = {
 			install_btn.setAttribute( "disabled", "true" )
 			install_btn.setAttribute( "label", "Installing" )
 			checkbox.setAttribute( "disabled", true )
+			throbber.style.visibility = 'visible'
+			SiphonSettings.setStatus('Loading info from mozilla.org...this might take a moment.')
+
+			SiphonInstaller.installing[guid] = function() {
+				throbber.style.visibility = 'hidden'
+				install_btn.setAttribute( "label", "Restart" )
+			}
 			//install_btn.setAttribute( "label", "restart" )
 			//window.close()
 		}, false )
@@ -404,6 +430,18 @@ var SiphonInstaller = {
 			checkbox.setAttribute( "checked", true )
 
 		return list_item
+	},
+
+	onInstallWindowOpened: function( guid ) {
+		SiphonSettings.alertStatus('Loaded information from mozilla.org.')
+		if ( this.installing[guid] ) {
+			try{
+				this.installing[guid]()
+				delete this.installing[guid]
+			} catch (e) {
+				alert(e)
+			}
+		}
 	},
 
 	setSyncingUI: function() {
