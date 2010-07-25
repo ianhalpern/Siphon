@@ -27,6 +27,8 @@ var JSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Componen
 
 var Siphon = {
 
+	verbose: false,
+
 	STAT_INSTALLED: 1,
 	STAT_INSTALLED_NO_SYNC: 2,
 	STAT_NOT_INSTALLED_IGNORED: 3,
@@ -59,8 +61,15 @@ var Siphon = {
 	app_version: Components.classes[ "@mozilla.org/xre/app-info;1" ]
 	  .getService( Components.interfaces.nsIXULAppInfo ).version,
 
-	console: Components.classes["@mozilla.org/consoleservice;1"]
-                                 .getService(Components.interfaces.nsIConsoleService),
+	console: {
+		_console: Components.classes["@mozilla.org/consoleservice;1"]
+									 .getService(Components.interfaces.nsIConsoleService),
+
+		write: function( message ) {
+			if ( Siphon.verbose )
+				this._console.logStringMessage( message )
+		}
+	},
 
 	win: function() {
 		return Components.classes[ '@mozilla.org/appshell/window-mediator;1' ]
@@ -88,7 +97,10 @@ var Siphon = {
 
 	// Events
 	init: function() {
-		this.console.logStringMessage( 'init' )
+		this.console.write( 'init' )
+
+		this._email = this.prefs.getCharPref( 'email' )
+		this._api_url = this.prefs.getCharPref( 'api_url' )
 
 		this.addon_status = {}
 		this.deleted_addons = {}
@@ -100,6 +112,20 @@ var Siphon = {
 
 	},
 
+	checkForAccountChanges: function() {
+		if ( this._email != this.prefs.getCharPref( 'email' )
+		|| this._api_url != this.prefs.getCharPref( 'api_url' ) ) {
+			if ( this.prefs.getCharPref( 'addon_status' ) ) {
+				this.prefs.clearUserPref( 'addon_status' )
+				this.addon_status = {}
+			}
+
+			this.console.write( 'account checked' )
+			this._email = this.prefs.getCharPref( 'email' )
+			this._api_url = this.prefs.getCharPref( 'api_url' )
+		}
+	},
+
 	apiURL: function() {
 		return this.prefs.getCharPref( 'api_url' )
 	},
@@ -108,7 +134,7 @@ var Siphon = {
 		var $this = this
 
 		var event = { notify: function() {
-			$this.console.logStringMessage( 'periodic synchronize' )
+			$this.console.write( 'periodic synchronize' )
 			$this.synchronize()
 		} }
 
@@ -182,7 +208,7 @@ var Siphon = {
 			+ "&appABI="        + this.app_ABI
 			+ "&locale="        + this.locale
 
-		this.console.logStringMessage( url )
+		this.console.write( url )
 		new this.Request( url ).start( function( rdf_xml ) {
 
 			var start = rdf_xml.indexOf( '<em:updateLink>' )
@@ -288,6 +314,8 @@ var Siphon = {
 
 	synchronize: function( onSuccess, onFail ) {
 
+		this.checkForAccountChanges()
+
 		this.new_addons = []
 		this.call({
 			params: { type: 'get' },
@@ -329,7 +357,7 @@ var Siphon = {
 					}
 					n++
 				}
-				this.console.logStringMessage("sync get: " + n )
+				this.console.write("sync get: " + n )
 
 				/*     | 1  2  3  |
 				 *     |--------------
@@ -344,12 +372,12 @@ var Siphon = {
 				 *
 				 */
 				for ( var guid in addon_mode ) {
-					this.console.logStringMessage( guid + ' ' + addon_mode[ guid ] )
+					this.console.write( guid + ' ' + addon_mode[ guid ] )
 					switch( addon_mode[ guid ] ) {
 						case 1:
 						case 5:
 							this.addon_status[ guid ] = this.STAT_INSTALLED
-							this.console.logStringMessage( guid + ' installed' )
+							this.console.write( guid + ' installed' )
 							break
 						case 3:
 							this.em.uninstallItem( guid )
@@ -357,15 +385,15 @@ var Siphon = {
 						case 2:
 						case 6:
 							delete this.addon_status[ guid ]
-							this.console.logStringMessage( guid + ' deleted' )
+							this.console.write( guid + ' deleted' )
 							break
 						case 4:
 							if ( !this.addon_status[ guid ] ) this.new_addons.push( guid )
 							this.addon_status[ guid ] = this.STAT_NOT_INSTALLED
-							this.console.logStringMessage( guid + ' want install' )
+							this.console.write( guid + ' want install' )
 							break
 						case 7:
-							this.console.logStringMessage( guid + ' already synced' )
+							this.console.write( guid + ' already synced' )
 							break
 					}
 				}

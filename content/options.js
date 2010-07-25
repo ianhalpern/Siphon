@@ -234,16 +234,11 @@ var SiphonSettings = {
 	onSignUpSucceeded: function() {
 		try {
 		//Siphon.resetPrefs()
-		if ( Siphon.prefs.getCharPref( 'addon_status' ) )
-			Siphon.prefs.clearUserPref( 'addon_status' )
-
-		if ( Siphon.prefs.getCharPref( 'last_sync' ) )
-			Siphon.prefs.clearUserPref( 'last_sync' )
 		//Siphon.unsetFirstRun()
 		Siphon.prefs.setCharPref( "email", document.getElementById("s-email").value )
 		Siphon.prefs.setCharPref( "password", document.getElementById("s-password").value )
-
 		this.setSignUpSucceededUI()
+		this.onSyncCommand()
 
 		/*var $this = this
 
