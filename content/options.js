@@ -335,7 +335,7 @@ var SiphonInstaller = {
 		list_item.appendChild( icon )
 
 		var name_box = document.createElement( "box" )
-		name_box.setAttribute( "style", "overflow:hidden; width: 200px; whitespace: nowrap" )
+		name_box.setAttribute( "style", "overflow:hidden; width: 220px; whitespace: nowrap" )
 		list_item.appendChild( name_box )
 
 		var addon_name = document.createElement( 'label' )
@@ -416,6 +416,7 @@ var SiphonInstaller = {
 		delete_btn.setAttribute( "label", "Delete" )
 		delete_btn.addEventListener( "command", function( e ) {
 			Siphon.deleteAddon( guid )
+			throbber.style.visibility = 'visible'
 			list_item.remove()
 		}, false )
 

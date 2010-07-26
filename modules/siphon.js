@@ -23,11 +23,11 @@ var EXPORTED_SYMBOLS = [ "Siphon" ]
 
 var options_window = false
 
-var JSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON)
+//var JSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON)
 
 var Siphon = {
 
-	verbose: false,
+	verbose: true,
 
 	STAT_INSTALLED: 1,
 	STAT_INSTALLED_NO_SYNC: 2,
@@ -227,7 +227,7 @@ var Siphon = {
 			if ( options_window )
 				options_window.SiphonInstaller.onInstallWindowOpened( guid )
 			//$this.addon_status[ guid ] = $this.STAT_INSTALLED
-			//$this.prefs.setCharPref( 'addon_status', JSON.encode( $this.addon_status ) )
+			//$this.prefs.setCharPref( 'addon_status', JSON.stringify( $this.addon_status ) )
 			//$this.syncronize()
 			//$this.updateStatusbars()
 		} )
@@ -236,26 +236,26 @@ var Siphon = {
 
 	ignoreAddon: function( guid ) {
 		this.addon_status[ guid ] = this.STAT_NOT_INSTALLED_IGNORED
-		this.prefs.setCharPref( 'addon_status', JSON.encode( this.addon_status ) )
+		this.prefs.setCharPref( 'addon_status', JSON.stringify( this.addon_status ) )
 		this.updateStatusbars()
 	},
 
 	unignoreAddon: function( guid ) {
 		this.addon_status[ guid ] = this.STAT_NOT_INSTALLED
-		this.prefs.setCharPref( 'addon_status', JSON.encode( this.addon_status ) )
+		this.prefs.setCharPref( 'addon_status', JSON.stringify( this.addon_status ) )
 		this.updateStatusbars()
 	},
 
 	syncAddon: function( guid ) {
 		this.addon_status[ guid ] = this.STAT_INSTALLED
-		this.prefs.setCharPref( 'addon_status', JSON.encode( this.addon_status ) )
+		this.prefs.setCharPref( 'addon_status', JSON.stringify( this.addon_status ) )
 		this._syncronize_set()
 		this.updateStatusbars()
 	},
 
 	unsyncAddon: function( guid ) {
 		this.addon_status[ guid ] = this.STAT_INSTALLED_NO_SYNC
-		this.prefs.setCharPref( 'addon_status', JSON.encode( this.addon_status ) )
+		this.prefs.setCharPref( 'addon_status', JSON.stringify( this.addon_status ) )
 		this.updateStatusbars()
 	},
 
@@ -267,7 +267,7 @@ var Siphon = {
 			} catch ( e ) {}
 		}
 		delete this.addon_status[ guid ]
-		this.prefs.setCharPref( 'addon_status', JSON.encode( this.addon_status ) )
+		this.prefs.setCharPref( 'addon_status', JSON.stringify( this.addon_status ) )
 		this._syncronize_set()
 	},
 
@@ -323,7 +323,7 @@ var Siphon = {
 			onSuccess: function( json ) {
 
 				if ( this.prefs.getCharPref( 'addon_status' ) )
-					this.addon_status = JSON.decode( this.prefs.getCharPref( 'addon_status' ) )
+					this.addon_status = JSON.parse( this.prefs.getCharPref( 'addon_status' ) )
 
 				var installed_addons = this.em.getItemList( 2, [] )
 
@@ -398,7 +398,7 @@ var Siphon = {
 					}
 				}
 
-				this.prefs.setCharPref( 'addon_status', JSON.encode( this.addon_status ) )
+				this.prefs.setCharPref( 'addon_status', JSON.stringify( this.addon_status ) )
 				this._syncronize_set( onSuccess, onFail )
 
 			},
@@ -450,7 +450,8 @@ var Siphon = {
 
 			try {
 				//var json = eval( "(" + json_str + ")" )
-				var json = JSON.decode( json_str );
+				//$this.console.write( json_str )
+				var json = JSON.parse( json_str );
 
 				if ( json && json.alert_message && options_window )
 					options_window.alert( json.alert_message )
@@ -562,6 +563,19 @@ Siphon.Request.prototype = {
 
 		this._callback = callback
 
+		var request = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+		request.open('POST', this._url + this.encode( this._params ), true);
+		request.setRequestHeader('Content-Type','text/json; charset=utf-8');
+		request.send( JSON.stringify( this._data ) );
+
+		request.onreadystatechange = function() {
+			if ( request.readyState == 4 ) {
+				callback( request.responseText )
+			}
+		}
+		return
+	},
+	/*
 		// the IO service
 		var ioService = Components.classes[ "@mozilla.org/network/io-service;1" ]
 		  .getService( Components.interfaces.nsIIOService )
@@ -573,12 +587,12 @@ Siphon.Request.prototype = {
 		var inputStream = Components.classes[ "@mozilla.org/io/string-input-stream;1" ]
 		  .createInstance( Components.interfaces.nsIStringInputStream )
 
-		var data_str = JSON.encode( this._data )
+		var data_str = JSON.stringify( this._data )
 		inputStream.setData( data_str, data_str.length )
 
 		var uploadChannel = this._channel.QueryInterface( Components.interfaces.nsIUploadChannel )
-		uploadChannel.setUploadStream( inputStream, "text/json", -1 )
-
+		uploadChannel.setUploadStream( inputStream, "text/json; charset=utf-8", -1 )
+		//uploadChannel.setUploadStream( inputStream, "text/json", -1 )
 
 		if ( this._channel instanceof Components.interfaces.nsIHttpChannel )
 			this._channel.requestMethod = 'POST'
@@ -624,7 +638,7 @@ Siphon.Request.prototype = {
 
 		}
 
-	},
+	},*/
 
 	encode: function( obj ) {
 		var str = ""
