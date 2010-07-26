@@ -27,7 +27,7 @@ var options_window = false
 
 var Siphon = {
 
-	verbose: true,
+	verbose: false,
 
 	STAT_INSTALLED: 1,
 	STAT_INSTALLED_NO_SYNC: 2,
