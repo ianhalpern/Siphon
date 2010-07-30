@@ -1,5 +1,4 @@
 pref("extensions.siphon.email","");
-pref("extensions.siphon.password","");
 pref("extensions.siphon.api_url","http://siphon-fx.com/api/");
 pref("extensions.siphon.last_sync","");
 pref("extensions.siphon.addon_status","");

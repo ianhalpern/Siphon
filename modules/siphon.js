@@ -61,6 +61,13 @@ var Siphon = {
 	app_version: Components.classes[ "@mozilla.org/xre/app-info;1" ]
 	  .getService( Components.interfaces.nsIXULAppInfo ).version,
 
+	login_manager: Components.classes["@mozilla.org/login-manager;1"]
+	  .getService(Components.interfaces.nsILoginManager),
+
+	login_info: new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
+                                              Components.interfaces.nsILoginInfo,
+                                              "init"),
+
 	console: {
 		_console: Components.classes["@mozilla.org/consoleservice;1"]
 									 .getService(Components.interfaces.nsIConsoleService),
@@ -107,6 +114,8 @@ var Siphon = {
 		this.addons = {}
 		this.new_addons = []
 
+		this.findLoginInfo()
+
 		this.synchronize()
 		this.startPeriodicSynchronizer()
 
@@ -124,6 +133,45 @@ var Siphon = {
 			this._email = this.prefs.getCharPref( 'email' )
 			this._api_url = this.prefs.getCharPref( 'api_url' )
 		}
+	},
+
+	hostname: function() {
+		var api_url = this.prefs.getCharPref( "api_url" )
+		var i = api_url.indexOf( '//' )
+		var j = api_url.substr( i+2 ).indexOf( '/' )
+		return api_url.substr( 0, i + 2 + j )
+	},
+
+	findLoginInfo: function() {
+		// Find users for the given parameters
+		var logins = this.login_manager.findLogins( {}, this.hostname(), this.prefs.getCharPref( "api_url" ), null )
+
+		// Find user from returned array of nsILoginInfo objects
+		for ( var i = 0; i < logins.length; i++ ) {
+			if ( logins[i].username == this.prefs.getCharPref( 'email' ) ) {
+				this._login_info = logins[i]
+				return
+			}
+		}
+
+		this._login_info = new this.login_info( this.hostname(), this.prefs.getCharPref( "api_url" ), null,
+			this.prefs.getCharPref( 'email' ), "", "", "" )
+		return
+	},
+
+	setLoginInfo: function( password ) {
+		var new_login_info = new this.login_info( this.hostname(), this.prefs.getCharPref( "api_url" ), null,
+		  this.prefs.getCharPref( 'email' ), password, "", "" )
+
+		if ( new_login_info.password ) {
+			if ( new_login_info.hostname == this._login_info.hostname
+			&& new_login_info.formSubmitURL == this._login_info.formSubmitURL && this._login_info.password )
+				this.login_manager.modifyLogin( this._login_info, new_login_info )
+			else
+				this.login_manager.addLogin( new_login_info )
+		}
+
+		this._login_info = new_login_info
 	},
 
 	apiURL: function() {
@@ -282,26 +330,6 @@ var Siphon = {
 		}
 	},
 
-	/*updateInstalledList: function( list ) {
-		this.uninstalled_addons = list
-		this.prefs.setCharPref( "wait_list", this.uninstalled_addons.join( "," ) )
-
-		for ( var i = 0; i < this.ignored_addons.length; i++ ) {
-			var found = false
-			for ( var j = 0; j < this.uninstalled_addons.length; j++ ) {
-				if ( this.uninstalled_addons[ j ].id == this.ignored_addons[ i ] ) {
-					found = true
-					break
-				}
-			}
-			if ( ! found ) this.ignored_addons.splice( i, 1 )
-		}
-
-		this.prefs.setCharPref( "ignore_list", this.ignored_addons.join( "," ) )
-
-		return this.uninstalled_addons.length
-	},*/
-
 	signup: function( email, password, onSuccess, onFail ) {
 
 		this.call({
@@ -441,7 +469,7 @@ var Siphon = {
 		return this.transport = new this.Request( this.apiURL(), this.objMerge( {
 			type:     '',
 			email:    this.prefs.getCharPref( 'email' ),
-			password: this.prefs.getCharPref( 'password' ),
+			password: this._login_info.password,
 			version:  this.prefs.getCharPref( 'version' ),
 			rand: new Date().getTime()
 		}, options.params || {} ), options.data || {} ).start( function( json_str ) {
@@ -449,7 +477,6 @@ var Siphon = {
 			$this.transport = null
 
 			try {
-				//var json = eval( "(" + json_str + ")" )
 				//$this.console.write( json_str )
 				var json = JSON.parse( json_str );
 
@@ -575,70 +602,6 @@ Siphon.Request.prototype = {
 		}
 		return
 	},
-	/*
-		// the IO service
-		var ioService = Components.classes[ "@mozilla.org/network/io-service;1" ]
-		  .getService( Components.interfaces.nsIIOService )
-
-		this._channel = ioService.newChannelFromURI( ioService.newURI( this._url + this.encode( this._params ), null, null ) )
-
-		// get an listener
-
-		var inputStream = Components.classes[ "@mozilla.org/io/string-input-stream;1" ]
-		  .createInstance( Components.interfaces.nsIStringInputStream )
-
-		var data_str = JSON.stringify( this._data )
-		inputStream.setData( data_str, data_str.length )
-
-		var uploadChannel = this._channel.QueryInterface( Components.interfaces.nsIUploadChannel )
-		uploadChannel.setUploadStream( inputStream, "text/json; charset=utf-8", -1 )
-		//uploadChannel.setUploadStream( inputStream, "text/json", -1 )
-
-		if ( this._channel instanceof Components.interfaces.nsIHttpChannel )
-			this._channel.requestMethod = 'POST'
-
-		// Create a stream loader for retrieving the response.
-		var streamLoader = Components.classes[ "@mozilla.org/network/stream-loader;1" ]
-		  .createInstance( Components.interfaces.nsIStreamLoader )
-
-		try {
-			// Before Firefox 3...
-			streamLoader.init( this._channel, this, null )
-		} catch ( e ) {
-			// Firefox 3 style...
-			streamLoader.init( this )
-			this._channel.asyncOpen( streamLoader, null )
-		}
-
-		return
-
-	},
-
-	onStreamComplete: function( loader, ctxt, status, resultLength, result ) {
-
-		if ( Components.isSuccessCode( status ) ) {
-			try {
-				status = this._channel.responseStatus || 200
-			} catch ( e ) {
-				this._callback( this._channel.responseStatus + ": Disable automatic proxy settings detection." )
-				return
-			}
-
-			var converter = Components.classes[ "@mozilla.org/intl/scriptableunicodeconverter" ]
-			  .createInstance(Components.interfaces.nsIScriptableUnicodeConverter)
-			converter.charset = "utf-8"
-
-			var msg = ""
-			if (status == 200 || status == 201 || status == 204) {
-
-				msg = converter.convertFromByteArray(result, resultLength)
-				this._callback( msg )
-
-			}
-
-		}
-
-	},*/
 
 	encode: function( obj ) {
 		var str = ""

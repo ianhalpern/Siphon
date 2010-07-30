@@ -27,11 +27,10 @@ var SiphonSettings = {
 
 	draw: function() {
 		document.getElementById( "last-sync" ).setAttribute( "value", Siphon.prefs.getCharPref( "last_sync" ) || "Not synced yet." )
-		var api_url = Siphon.prefs.getCharPref( "api_url" )
-		var i = api_url.indexOf( '//' )
-		var j = api_url.substr( i+2 ).indexOf( '/' )
-		document.getElementById( "server-settings-label" ).setAttribute( "value", api_url.substr( 0, i + 2 + j ) )
-		document.getElementById( "server-settings-label" ).setAttribute( "href", api_url.substr( 0, i + 2 + j ) )
+		var hostname = Siphon.hostname()
+		document.getElementById( "server-settings-label" ).setAttribute( "value", hostname )
+		document.getElementById( "server-settings-label" ).setAttribute( "href", hostname )
+		document.getElementById( "l-password" ).value = Siphon._login_info.password
 		//this.updateStatus()
 	},
 
@@ -156,7 +155,6 @@ var SiphonSettings = {
 	},
 
 	validateSignUpInfo: function(onSuccess, onFail) {
-	//	setTimeout(onSuccess, 500)
 		Siphon.signup(
 			document.getElementById("s-email").value, document.getElementById("s-password").value,
 			onSuccess, onFail
@@ -240,14 +238,6 @@ var SiphonSettings = {
 		this.setSignUpSucceededUI()
 		this.onSyncCommand()
 
-		/*var $this = this
-
-		setTimeout( function() {
-			try {
-				$this.closeSignup()
-				$this.onSyncCommand()
-			} catch ( e ) { alert ( e ) }
-		}, 1000 )*/
 		} catch ( e ) { alert( e ) }
 	},
 
@@ -260,6 +250,7 @@ var SiphonSettings = {
 		var features = "chrome,titlebar,centerscreen,resizable"
 		var win = window.openDialog( "chrome://siphon/content/server-configuration.xul", "Siphon Server Configuration", features )
 		win.addEventListener( "unload", function() {
+			Siphon.findLoginInfo()
 			SiphonSettings.redraw()
 		}, false )
 	}

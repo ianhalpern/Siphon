@@ -63,7 +63,6 @@
 
 		<preferences>
 			<preference id="pref-email"    name="extensions.siphon.email"    type="string" />
-			<preference id="pref-password" name="extensions.siphon.password" type="string" />
 		</preferences>
 
 		<groupbox style=" overflow: hidden">
@@ -86,12 +85,12 @@
 				<groupbox>
 					<hbox align="center">
 						<label style="width:100px" control="l-email" value="&options.panemain.email;:"/>
-						<textbox id="l-email" preference="pref-email" />
+						<textbox id="l-email" preference="pref-email" onchange="Siphon.setLoginInfo( document.getElementById('l-password').value )" />
 						<spacer flex="1" />
 					</hbox>
 					<hbox align="center">
 						<label style="width:100px" control="l-password" value="&options.panemain.password;:"/>
-						<textbox id="l-password" type="password" preference="pref-password" />
+						<textbox id="l-password" type="password" onchange="Siphon.setLoginInfo( this.value )" />
 						<spacer flex="1" />
 					</hbox>
 				</groupbox>
