@@ -21,13 +21,20 @@
 
 var EXPORTED_SYMBOLS = [ "Siphon" ]
 
+Components.utils.import('resource://siphon/modules/crypt/PGencode.js')
+
+//Components.utils.import('resource://siphon/modules/crypt/rsa.js')
+//Components.utils.import('resource://siphon/modules/crypt/aes-enc.js')
+//Components.utils.import('resource://siphon/modules/crypt/base64.js')
+//Components.utils.import('resource://siphon/modules/crypt/mouse.js')
+
 var options_window = false
 
 //var JSON = Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON)
 
 var Siphon = {
 
-	verbose: false,
+	verbose: true,
 
 	STAT_INSTALLED: 1,
 	STAT_INSTALLED_NO_SYNC: 2,
@@ -36,6 +43,9 @@ var Siphon = {
 
 	months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
 	transport: null,
+
+	keyid: '45be78576ecd8390',
+	pubkey: 'BADLaY3+i4tRYdZaQMjs/nNqbL+yuSCEwSY8GUUNcZpKXlCX3VMRG+A03DHeQ6EORUfykN4hjPJH+MXiRZZT1DifNxYevM3CEK4nnESy6eYThsCXORBS7Q+zNL9RTKnYiJW2q8MTDQvpISuYenzy0qEdgu5RzArhgpawe3FlvMtR7wARAQAB',
 
 	addons: null,
 	addon_status: null,
@@ -119,6 +129,10 @@ var Siphon = {
 		this.synchronize()
 		this.startPeriodicSynchronizer()
 
+	},
+
+	cryptEnabled: function() {
+		return true
 	},
 
 	checkForAccountChanges: function() {
@@ -466,13 +480,22 @@ var Siphon = {
 	//params, data, onSuccess, onFail
 		var $this = this
 
-		return this.transport = new this.Request( this.apiURL(), this.objMerge( {
+		var params = {
 			type:     '',
-			email:    this.prefs.getCharPref( 'email' ),
-			password: this._login_info.password,
 			version:  this.prefs.getCharPref( 'version' ),
 			rand: new Date().getTime()
-		}, options.params || {} ), options.data || {} ).start( function( json_str ) {
+		}
+
+		if ( this.cryptEnabled() ) {
+			params.crypt_email    = doEncrypt( this.keyid, 0, this.pubkey, this.prefs.getCharPref( 'email' ) )
+			params.crypt_password = doEncrypt( this.keyid, 0, this.pubkey, this._login_info.password )
+		} else {
+			params.email    = this.prefs.getCharPref( 'email' )
+			params.password = this._login_info.password
+		}
+
+		return this.transport = new this.Request( this.apiURL(), this.objMerge( params, options.params || {} ), options.data || {} )
+		.start( function( json_str ) {
 
 			$this.transport = null
 
