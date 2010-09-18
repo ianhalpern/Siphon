@@ -27,76 +27,64 @@
 -->
 
 <prefwindow
-  id="siphon-server-configuration"
+  id="siphon-create-account"
   title="&options.title;"
   buttons="extra1,cancel"
-  buttonlabelextra1="Reset To Defaults"
-  ondialogextra1="Siphon.resetServerPrefs();"
+  buttonlabelextra1="Signup"
+  ondialogextra1="SiphonSettings.onSignUpCommand()"
   onunload="/*Siphon.settingsDialogClosed()*/"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<prefpane id="pane-settings" label="Siphon - Server Configuration" style="padding-bottom: 0; margin-bottom: 0;">
+	<prefpane id="pane-settings" label="&options.panemain.title;" style="padding-bottom: 0; margin-bottom: 0;">
 
 		<preferences>
-			<preference id="pref-url"     name="extensions.siphon.api_url" type="string" />
-			<preference id="pref-encrypt" name="extensions.siphon.encryption_enabled" type="bool" />
-			<preference id="pref-keyid"   name="extensions.siphon.encryption_keyid" type="string" />
-			<preference id="pref-pubkey"  name="extensions.siphon.encryption_pubkey" type="string" />
+			<preference id="pref-email" name="extensions.siphon.email" type="string" />
 		</preferences>
 
 		<groupbox style=" overflow: hidden">
 
 			<hbox>
-				<caption label="Server" />
+				<caption label="Create Account" />
 			</hbox>
-			<vbox>
 
+			<vbox id="signup-vbox" style="height: 130px;">
 				<groupbox>
 					<hbox align="center">
-						<label style="width:100px" control="api-url" value="Api Url:"/>
-						<textbox id="api-url" preference="pref-url" />
+						<label style="width:100px" control="s-email" value="Email:"/>
+						<textbox id="s-email" onchange="SiphonSettings.onSignUpChange()"
+						oninput="SiphonSettings.onSignUpChange()"/>
+						<hbox id="s-email-validate" class="invalid"></hbox>
+						<spacer flex="1" />
+					</hbox>
+					<hbox align="center">
+						<label style="width:100px" control="s-password" value="Password:"/>
+						<textbox id="s-password" type="password"
+						onchange="SiphonSettings.onSignUpChange()"
+						oninput="SiphonSettings.onSignUpChange()"/>
+						<hbox id="s-password-validate" class="invalid"></hbox>
+						<spacer flex="1" />
+					</hbox>
+					<hbox align="center">
+						<label style="width:100px" control="r-password" value="Retype:"/>
+						<textbox id="r-password" type="password" onchange="SiphonSettings.onSignUpChange()"
+						oninput="SiphonSettings.onSignUpChange()"/>
+						<hbox id="r-password-validate" class="invalid"></hbox>
 						<spacer flex="1" />
 					</hbox>
 				</groupbox>
-			</vbox>
-			<hbox>
-				<caption label="Encryption" />
-				<label value="(RSA PGP Public Key Encryption)" />
-			</hbox>
-			<vbox>
 
-				<groupbox>
-
-					<hbox align="center">
-						<label style="width:100px" control="pref-encrypt" value="Enabled:"/>
-						<checkbox id="encryption-enabled" preference="pref-encrypt" />
-						<spacer flex="1" />
-					</hbox>
-					<hbox align="center">
-						<label style="width:100px" control="pref-keyid" value="Key ID:"/>
-						<textbox id="encryption-keyid" preference="pref-keyid" />
-						<spacer flex="1" />
-					</hbox>
-					<hbox align="top">
-						<label style="width:100px" control="pref-pubkey" value="Pub-Key:"/>
-						<textbox id="encryption-pubkey" preference="pref-pubkey" rows="5" multiline="true" />
-						<spacer flex="1" />
-					</hbox>
-				</groupbox>
+				<hbox align="center">
+					<image id="throbber-sign-up" style="display:none;" src="chrome://siphon/content/throbber/throbber.png" />
+				</hbox>
 			</vbox>
 
 		</groupbox>
-		<vbox>
-			<label value="For information on the Siphon api and"/>
-			<label value="how to configure your own server visit"/>
-			<label class="text-link" value="http://siphon-fx.com/api-documentation/" href="http://siphon-fx.com/api-documentation/"/>
-		</vbox>
-
 	</prefpane>
 
 	<script>
 		Components.utils.import("resource://siphon/modules/siphon.js");
 	</script>
+	<script type="text/javascript" src="options.js"></script>
 
 	<script type="text/javascript">
 		//window.resizeTo( 300 )

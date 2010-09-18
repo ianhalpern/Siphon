@@ -4,4 +4,8 @@ pref("extensions.siphon.last_sync","");
 pref("extensions.siphon.addon_status","");
 pref("extensions.siphon.version","0.9.0");
 pref("extensions.siphon.first_run",true);
+pref("extensions.siphon.hide_status_bar", false);
 pref("extensions.siphon.sync_interval_minutes",300);
+pref("extensions.siphon.encryption_enabled", true );
+pref("extensions.siphon.encryption_keyid", "45be78576ecd8390" );
+pref("extensions.siphon.encryption_pubkey","BADLaY3+i4tRYdZaQMjs/nNqbL+yuSCEwSY8GUUNcZpKXlCX3VMRG+A03DHeQ6EORUfykN4hjPJH+MXiRZZT1DifNxYevM3CEK4nnESy6eYThsCXORBS7Q+zNL9RTKnYiJW2q8MTDQvpISuYenzy0qEdgu5RzArhgpawe3FlvMtR7wARAQAB");

@@ -19,6 +19,8 @@
 
 var EXPORTED_SYMBOLS = [ 'mpi2b', 'b2mpi', 'bmodexp' ]
 
+Components.utils.import('resource://siphon/modules/console.js')
+
 var bs=28;
 var bx2=1<<bs, bm=bx2-1, bx=bx2>>1, bd=bs>>1, bdm=(1<<bd)-1;
 
@@ -406,7 +408,7 @@ function mpi2b(s)
  var c, sn=s.length;
  if(sn < 2)
  {
-    alert('string too short, not a MPI');
+    console.write('string too short, not a MPI');
     return 0;
  }
 
@@ -414,7 +416,7 @@ function mpi2b(s)
  var bits=s.charCodeAt(0)*256+s.charCodeAt(1);
  if(bits > len || bits < len-8) 
  {
-    alert('not a MPI, bits='+bits+",len="+len);
+    console.write('not a MPI, bits='+bits+",len="+len);
     return 0;
  }
 

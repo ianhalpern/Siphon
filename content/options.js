@@ -19,6 +19,8 @@
  *    along with Siphon.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+Components.utils.import('resource://siphon/modules/console.js')
+
 var SiphonSettings = {
 
 	init: function() {
@@ -53,18 +55,16 @@ var SiphonSettings = {
 		//this.alertSignupStatus("Signup Failed")
 	},
 
-	setSignUpableUI: function() {
+	/*setSignUpableUI: function() {
 		document.getElementById("sign-up-btn").disabled = false
 	},
 
 	setUnsignUpableUI: function() {
 		document.getElementById("sign-up-btn").disabled = true
-	},
+	},*/
 
 	setSigningUpUI: function() {
 		document.getElementById("throbber-sign-up").style.display = "block"
-		document.getElementById("stop-sign-up-btn").style.display = "block"
-		document.getElementById("sign-up-btn").style.display = "none"
 		document.getElementById("s-email").disabled =
 		document.getElementById("s-password").disabled =
 		document.getElementById("r-password").disabled = true
@@ -72,16 +72,14 @@ var SiphonSettings = {
 
 	setSignedUpUI: function() {
 		document.getElementById("throbber-sign-up").style.display = "none"
-		document.getElementById("stop-sign-up-btn").style.display = "none"
-		document.getElementById("sign-up-btn").style.display = "block"
 		document.getElementById("s-email").disabled =
 		document.getElementById("s-password").disabled =
 		document.getElementById("r-password").disabled = false
 
-		if (this.validateSignUpText())
+		/*if (this.validateSignUpText())
 			this.setSignUpableUI()
 		else
-			this.setUnsignUpableUI()
+			this.setUnsignUpableUI()*/
 	},
 
 	disableMainButtons: function() {
@@ -204,10 +202,11 @@ var SiphonSettings = {
 	},
 
 	onSignUpChange: function() {
-		if (this.validateSignUpText())
+		this.validateSignUpText()
+		/*if (this.validateSignUpText())
 			this.setSignUpableUI()
 		else
-			this.setUnsignUpableUI()
+			this.setUnsignUpableUI()*/
 	},
 
 	onSignUpCommand: function() {
@@ -216,7 +215,8 @@ var SiphonSettings = {
 			this.validateSignUpInfo(
 				function(){
 					SiphonSettings.onSignUpSucceeded();
-					SiphonSettings.setSignUpSucceededUI(); },
+				//	SiphonSettings.setSignUpSucceededUI();
+				},
 				function(){SiphonSettings.setSignUpFailedUI()}
 			)
 		} catch(e) {
@@ -234,9 +234,10 @@ var SiphonSettings = {
 		//Siphon.resetPrefs()
 		//Siphon.unsetFirstRun()
 		Siphon.prefs.setCharPref( "email", document.getElementById("s-email").value )
-		Siphon.prefs.setCharPref( "password", document.getElementById("s-password").value )
-		this.setSignUpSucceededUI()
-		this.onSyncCommand()
+		Siphon.setLoginInfo( document.getElementById("s-password").value )
+		//this.setSignUpSucceededUI()
+		//this.onSyncCommand()
+		window.close()
 
 		} catch ( e ) { alert( e ) }
 	},
@@ -249,6 +250,15 @@ var SiphonSettings = {
 	onServerConfigureCommand: function() {
 		var features = "chrome,titlebar,centerscreen,resizable"
 		var win = window.openDialog( "chrome://siphon/content/server-configuration.xul", "Siphon Server Configuration", features )
+		win.addEventListener( "unload", function() {
+			Siphon.findLoginInfo()
+			SiphonSettings.redraw()
+		}, false )
+	},
+
+	onCreateAccountCommand: function() {
+		var features = "chrome,titlebar,centerscreen,resizable"
+		var win = window.openDialog( "chrome://siphon/content/create-account.xul", "Create a Siphon Account", features )
 		win.addEventListener( "unload", function() {
 			Siphon.findLoginInfo()
 			SiphonSettings.redraw()
@@ -287,6 +297,12 @@ var SiphonInstaller = {
 		for ( var i = sorted_addons.length - 1; i >= 0; i-- ) {
 			for ( var j = 0; j < sorted_addons[i].length; j++ ) {
 				var guid = sorted_addons[i][j]
+
+				var keys = []
+				for ( var key in Siphon.addons[ guid ] )
+					keys.push( key +':'+Siphon.addons[ guid ][key] )
+				console.write( keys )
+
 				document.getElementById('siphon_addon_listbox').appendChild(
 					this.createAddonListitem(
 						Siphon.addons[ guid ].name,
@@ -322,7 +338,7 @@ var SiphonInstaller = {
 		}
 
 		var icon = document.createElement( "image" )
-		icon.setAttribute( "src", "chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png" )
+		icon.setAttribute( "src", Siphon.addons[guid].iconURL || "chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png" )
 		list_item.appendChild( icon )
 
 		var name_box = document.createElement( "box" )
@@ -393,10 +409,18 @@ var SiphonInstaller = {
 			throbber.style.visibility = 'visible'
 			SiphonSettings.setStatus('Loading info from mozilla.org...this might take a moment.')
 
-			SiphonInstaller.installing[guid] = function() {
-				throbber.style.visibility = 'hidden'
-				install_btn.setAttribute( "label", "Restart" )
-			}
+			SiphonInstaller.installing[guid] = [
+				function() {
+					throbber.style.visibility = 'hidden'
+					install_btn.setAttribute( "label", "Restart" )
+				},
+				function() {
+					throbber.style.visibility = 'hidden'
+					install_btn.setAttribute( "label", "Install" )
+					install_btn.setAttribute( "disabled", "false" )
+					checkbox.setAttribute( "disabled", false )
+				}
+			]
 			//install_btn.setAttribute( "label", "restart" )
 			//window.close()
 		}, false )
@@ -423,7 +447,19 @@ var SiphonInstaller = {
 		SiphonSettings.alertStatus('Loaded information from mozilla.org.')
 		if ( this.installing[guid] ) {
 			try{
-				this.installing[guid]()
+				this.installing[guid][0]()
+				delete this.installing[guid]
+			} catch (e) {
+				alert(e)
+			}
+		}
+	},
+
+	onInstallFailed: function( guid ) {
+		SiphonSettings.alertStatus('Could not locate add-on installer.')
+		if ( this.installing[guid] ) {
+			try{
+				this.installing[guid][1]()
 				delete this.installing[guid]
 			} catch (e) {
 				alert(e)

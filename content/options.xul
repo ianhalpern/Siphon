@@ -62,7 +62,8 @@
 	<prefpane id="pane-settings" label="&options.panemain.title;" style="padding-bottom: 0; margin-bottom: 0;">
 
 		<preferences>
-			<preference id="pref-email"    name="extensions.siphon.email"    type="string" />
+			<preference id="pref-email" name="extensions.siphon.email" type="string" />
+			<preference id="pref-hide-status-bar" name="extensions.siphon.hide_status_bar" type="bool" />
 		</preferences>
 
 		<groupbox style=" overflow: hidden">
@@ -98,45 +99,22 @@
 				<hbox align="center">
 					<button id="show-sign-up-btn" label="Synchronize" oncommand="SiphonSettings.onSyncCommand()" />
 					<button id="forgot-btn" label="&options.panemain.forgot_btn;" oncommand="SiphonSettings.onForgotCommand()" />
+					<button id="forgot-btn" label="Create Account" oncommand="SiphonSettings.onCreateAccountCommand()"/>
 				</hbox>
 				<separator />
 			</vbox>
 
 			<hbox>
-				<caption label="Create Account" />
+				<caption label="Options" />
 			</hbox>
 
-			<vbox id="signup-vbox" style="height: 130px;">
+			<vbox>
 				<groupbox>
 					<hbox align="center">
-						<label style="width:100px" control="s-email" value="Email:"/>
-						<textbox id="s-email" onchange="SiphonSettings.onSignUpChange()"
-						oninput="SiphonSettings.onSignUpChange()"/>
-						<hbox id="s-email-validate" class="invalid"></hbox>
-						<spacer flex="1" />
-					</hbox>
-					<hbox align="center">
-						<label style="width:100px" control="s-password" value="Password:"/>
-						<textbox id="s-password" type="password"
-						onchange="SiphonSettings.onSignUpChange()"
-						oninput="SiphonSettings.onSignUpChange()"/>
-						<hbox id="s-password-validate" class="invalid"></hbox>
-						<spacer flex="1" />
-					</hbox>
-					<hbox align="center">
-						<label style="width:100px" control="r-password" value="Retype:"/>
-						<textbox id="r-password" type="password" onchange="SiphonSettings.onSignUpChange()"
-						oninput="SiphonSettings.onSignUpChange()"/>
-						<hbox id="r-password-validate" class="invalid"></hbox>
+						<checkbox preference="pref-hide-status-bar" label="Hide status bar icon when all add-ons are installed"/>
 						<spacer flex="1" />
 					</hbox>
 				</groupbox>
-
-				<hbox align="center">
-					<button id="sign-up-btn" label="Sign Up" disabled="true" oncommand="SiphonSettings.onSignUpCommand()"/>
-					<image id="throbber-sign-up" style="display:none;" src="chrome://siphon/content/throbber/throbber.png" />
-					<button id="stop-sign-up-btn" label="Stop" style="display:none;" oncommand="SiphonSettings.onSignUpStopCommand()"/>
-				</hbox>
 			</vbox>
 
 		</groupbox>

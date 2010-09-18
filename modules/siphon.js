@@ -21,6 +21,9 @@
 
 var EXPORTED_SYMBOLS = [ "Siphon" ]
 
+Components.utils.import('resource://siphon/modules/console.js')
+console.verbose = true
+console.prefix = 'Siphon: '
 Components.utils.import('resource://siphon/modules/crypt/PGencode.js')
 
 //Components.utils.import('resource://siphon/modules/crypt/rsa.js')
@@ -34,8 +37,6 @@ var options_window = false
 
 var Siphon = {
 
-	verbose: true,
-
 	STAT_INSTALLED: 1,
 	STAT_INSTALLED_NO_SYNC: 2,
 	STAT_NOT_INSTALLED_IGNORED: 3,
@@ -43,9 +44,6 @@ var Siphon = {
 
 	months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
 	transport: null,
-
-	keyid: '45be78576ecd8390',
-	pubkey: 'BADLaY3+i4tRYdZaQMjs/nNqbL+yuSCEwSY8GUUNcZpKXlCX3VMRG+A03DHeQ6EORUfykN4hjPJH+MXiRZZT1DifNxYevM3CEK4nnESy6eYThsCXORBS7Q+zNL9RTKnYiJW2q8MTDQvpISuYenzy0qEdgu5RzArhgpawe3FlvMtR7wARAQAB',
 
 	addons: null,
 	addon_status: null,
@@ -78,16 +76,6 @@ var Siphon = {
                                               Components.interfaces.nsILoginInfo,
                                               "init"),
 
-	console: {
-		_console: Components.classes["@mozilla.org/consoleservice;1"]
-									 .getService(Components.interfaces.nsIConsoleService),
-
-		write: function( message ) {
-			if ( Siphon.verbose )
-				this._console.logStringMessage( message )
-		}
-	},
-
 	win: function() {
 		return Components.classes[ '@mozilla.org/appshell/window-mediator;1' ]
 		  .getService( Components.interfaces.nsIWindowMediator )
@@ -114,7 +102,7 @@ var Siphon = {
 
 	// Events
 	init: function() {
-		this.console.write( 'init' )
+		console.write( 'init' )
 
 		this._email = this.prefs.getCharPref( 'email' )
 		this._api_url = this.prefs.getCharPref( 'api_url' )
@@ -132,7 +120,7 @@ var Siphon = {
 	},
 
 	cryptEnabled: function() {
-		return true
+		return this.prefs.getBoolPref( 'encryption_enabled' )
 	},
 
 	checkForAccountChanges: function() {
@@ -143,7 +131,7 @@ var Siphon = {
 				this.addon_status = {}
 			}
 
-			this.console.write( 'account checked' )
+			console.write( 'account checked' )
 			this._email = this.prefs.getCharPref( 'email' )
 			this._api_url = this.prefs.getCharPref( 'api_url' )
 		}
@@ -174,6 +162,8 @@ var Siphon = {
 	},
 
 	setLoginInfo: function( password ) {
+		this.findLoginInfo()
+
 		var new_login_info = new this.login_info( this.hostname(), this.prefs.getCharPref( "api_url" ), null,
 		  this.prefs.getCharPref( 'email' ), password, "", "" )
 
@@ -188,6 +178,15 @@ var Siphon = {
 		this._login_info = new_login_info
 	},
 
+	resetServerPrefs: function() {
+		var prefs = [ 'api_url', 'encryption_enabled', 'encryption_keyid', 'encryption_pubkey' ]
+
+		for ( var i = 0; i < prefs.length; i++ ) {
+			if ( this.prefs.prefHasUserValue( prefs[i] ) )
+				this.prefs.clearUserPref( prefs[i] )
+		}
+	},
+
 	apiURL: function() {
 		return this.prefs.getCharPref( 'api_url' )
 	},
@@ -196,7 +195,7 @@ var Siphon = {
 		var $this = this
 
 		var event = { notify: function() {
-			$this.console.write( 'periodic synchronize' )
+			console.write( 'periodic synchronize' )
 			$this.synchronize()
 		} }
 
@@ -250,6 +249,17 @@ var Siphon = {
 	},
 
 	// Actions
+	default_update_rdf: 'https://versioncheck.addons.mozilla.org/update/VersionCheck.php?'
+			+ "reqVersion=1"
+			+ "&id=%ITEM_ID%"
+			+ "&version=%ITEM_VERSION%"
+			+ "&maxAppVersion=%ITEM_MAXAPPVERSION%"
+			+ "&status=userEnabled"
+			+ "&appID=%APP_ID%"
+			+ "&appVersion=%APP_VERSION%"
+			+ "&appOS=%APP_OS%"
+			+ "&appABI=%APP_ABI%"
+			+ "&locale=%APP_LOCALE%",
 
 	installAddon: function( guid ) {
 		var addon, $this = this
@@ -258,19 +268,17 @@ var Siphon = {
 
 		if ( !addon ) return
 
-		var url = 'https://versioncheck.addons.mozilla.org/update/VersionCheck.php?'
-			+ "reqVersion=1"
-			+ "&id="            + addon.id
-			+ "&version="       + addon.version
-			+ "&maxAppVersion=" + addon.maxAppVersion
-			+ "&status=userEnabled"
-			+ "&appID="         + this.app_id
-			+ "&appVersion="    + this.app_version
-			+ "&appOS="         + this.app_OS
-			+ "&appABI="        + this.app_ABI
-			+ "&locale="        + this.locale
+		var url = ( this.addons[ guid ].updateRDF || this.default_update_rdf )
+			.replace( '%ITEM_ID%', addon.id )
+			.replace( '%ITEM_VERSION%', addon.version )
+			.replace( '%ITEM_MAXAPPVERSION%', addon.maxAppVersion )
+			.replace( '%APP_ID%', this.app_id )
+			.replace( '%APP_VERSION%', this.app_version )
+			.replace( '%APP_OS%', this.app_OS )
+			.replace( '%APP_ABI%', this.app_ABI )
+			.replace( '%APP_LOCALE%', this.locale )
 
-		this.console.write( url )
+		console.write( url )
 		new this.Request( url ).start( function( rdf_xml ) {
 
 			var start = rdf_xml.indexOf( '<em:updateLink>' )
@@ -278,7 +286,11 @@ var Siphon = {
 			var end   = rdf_xml.indexOf( '</em:updateLink>' )
 			var xpi_url = rdf_xml.substr( start, end-start )
 
-			if ( start == -1 || end == -1 ) return// Error, mal-formatted RDF xml
+			if ( start == -1 || end == -1 ) {
+				if ( options_window )
+					options_window.SiphonInstaller.onInstallFailed( guid )
+				return// Error, mal-formatted RDF xml
+			}
 
 			var win = Components.classes[ '@mozilla.org/appshell/window-mediator;1' ]
 			  .getService( Components.interfaces.nsIWindowMediator )
@@ -393,13 +405,13 @@ var Siphon = {
 				var n = 0
 				for ( var guid in json.addons ) {
 					if ( this.addon_status[ guid ] != this.STAT_INSTALLED_NO_SYNC ) {
-						this.addons[ guid ] = json.addons[ guid ]
+						if ( !this.addons[ guid ] ) this.addons[ guid ] = json.addons[ guid ]
 						if ( !addon_mode[ guid ] ) addon_mode[ guid ] = 0
 						addon_mode[ guid ] += 4
 					}
 					n++
 				}
-				this.console.write("sync get: " + n )
+				console.write("sync get: " + n )
 
 				/*     | 1  2  3  |
 				 *     |--------------
@@ -414,12 +426,12 @@ var Siphon = {
 				 *
 				 */
 				for ( var guid in addon_mode ) {
-					this.console.write( guid + ' ' + addon_mode[ guid ] )
+					console.write( guid + ' ' + addon_mode[ guid ] )
 					switch( addon_mode[ guid ] ) {
 						case 1:
 						case 5:
 							this.addon_status[ guid ] = this.STAT_INSTALLED
-							this.console.write( guid + ' installed' )
+							console.write( guid + ' installed' )
 							break
 						case 3:
 							this.em.uninstallItem( guid )
@@ -427,15 +439,15 @@ var Siphon = {
 						case 2:
 						case 6:
 							delete this.addon_status[ guid ]
-							this.console.write( guid + ' deleted' )
+							console.write( guid + ' deleted' )
 							break
 						case 4:
 							if ( !this.addon_status[ guid ] ) this.new_addons.push( guid )
 							this.addon_status[ guid ] = this.STAT_NOT_INSTALLED
-							this.console.write( guid + ' want install' )
+							console.write( guid + ' want install' )
 							break
 						case 7:
-							this.console.write( guid + ' already synced' )
+							console.write( guid + ' already synced' )
 							break
 					}
 				}
@@ -487,8 +499,16 @@ var Siphon = {
 		}
 
 		if ( this.cryptEnabled() ) {
-			params.crypt_email    = doEncrypt( this.keyid, 0, this.pubkey, this.prefs.getCharPref( 'email' ) )
-			params.crypt_password = doEncrypt( this.keyid, 0, this.pubkey, this._login_info.password )
+			try {
+			params.crypt_email    = doEncrypt( this.prefs.getCharPref('encryption_keyid'), 0,
+											   this.prefs.getCharPref('encryption_pubkey'), this.prefs.getCharPref( 'email' ) )
+
+			params.crypt_password = doEncrypt( this.prefs.getCharPref('encryption_keyid'), 0,
+											   this.prefs.getCharPref('encryption_pubkey'), this._login_info.password )
+			} catch ( e ) {
+				console.write( 'Error: ecnryption failed: ' + e )
+				return
+			}
 		} else {
 			params.email    = this.prefs.getCharPref( 'email' )
 			params.password = this._login_info.password
@@ -510,7 +530,7 @@ var Siphon = {
 					options_window.SiphonSettings.alertStatus( json.status_message )
 				}
 			} catch ( e ) {
-				this.win().alert( "Siphon Error: " + e/* json_str */ )
+				console.write( "Error: " + e/* json_str */ )
 			}
 
 			if ( json && json.retval == 0 ) {
@@ -568,8 +588,15 @@ var Siphon = {
 	updateStatusbars: function() {
 		var wins = this.wins()
 
+		var n = this.nUninstalledAddons()
+
 		for ( var i = 0; i < wins.length; i++ ) {
-			wins[i].document.getElementById( "siphon-statusbar-num" ).value = this.nUninstalledAddons() || ""
+			if ( !n && this.prefs.getBoolPref('hide_status_bar') )
+				wins[i].document.getElementById( "siphon-statusbar" ).style.display = 'none'
+			else
+				wins[i].document.getElementById( "siphon-statusbar" ).style.display = ''
+
+			wins[i].document.getElementById( "siphon-statusbar-num" ).value = n || ""
 			if ( this.nUninstalledAddons() )
 				wins[i].document.getElementById( "siphon-statusbar-alert" ).style.display = "block"
 			else

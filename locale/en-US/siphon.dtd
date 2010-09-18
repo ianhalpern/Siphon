@@ -1,6 +1,6 @@
 <!ENTITY options.title "Siphon - Settings">
 <!ENTITY options.panemain.title "Settings">
-<!ENTITY options.panemain.caption "Existing Account">
+<!ENTITY options.panemain.caption "Account">
 <!ENTITY options.panemain.host "Host">
 <!ENTITY options.panemain.email "Email">
 <!ENTITY options.panemain.password "Password">
