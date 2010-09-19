@@ -47,6 +47,7 @@ var Siphon = {
 
 	addons: null,
 	addon_status: null,
+	recommended: null,
 
 	em: Components.classes[ "@mozilla.org/extensions/manager;1" ]
 	  .getService( Components.interfaces.nsIExtensionManager ),
@@ -91,6 +92,10 @@ var Siphon = {
 			wins.push( enumerator.getNext() )
 		}
 		return wins
+	},
+
+	optionsWindow: function() {
+		return options_window
 	},
 
 	nUninstalledAddons: function() {
@@ -176,6 +181,8 @@ var Siphon = {
 		}
 
 		this._login_info = new_login_info
+
+		this.checkForAccountChanges()
 	},
 
 	resetServerPrefs: function() {
@@ -241,7 +248,7 @@ var Siphon = {
 	},
 
 	onForgotCommand: function( onSuccess, onFail ) {
-		this.call({ params: { type: "forgot" }, onSuccess: onSuccess, onFail: onFail })
+		this.call({ data: { type: "forgot" }, onSuccess: onSuccess, onFail: onFail })
 	},
 
 	onGetAddonCommand: function( guid ) {
@@ -359,7 +366,7 @@ var Siphon = {
 	signup: function( email, password, onSuccess, onFail ) {
 
 		this.call({
-			params: { type: "signup", email: email, password: password },
+			data: { type: "signup", email: email, password: password },
 			onSuccess: onSuccess,
 			onFail: onFail
 		})
@@ -372,13 +379,17 @@ var Siphon = {
 
 		this.new_addons = []
 		this.call({
-			params: { type: 'get' },
+			data: { type: 'get' },
 
 			onSuccess: function( json ) {
 
 				if ( this.prefs.getCharPref( 'addon_status' ) )
 					this.addon_status = JSON.parse( this.prefs.getCharPref( 'addon_status' ) )
 
+				if ( json.recommended )
+					this.recommended = json.recommended
+
+				console.write( this.recommended )
 				var installed_addons = this.em.getItemList( 2, [] )
 
 				var addon_mode = {}
@@ -465,15 +476,14 @@ var Siphon = {
 
 	_syncronize_set: function( onSuccess, onFail ) {
 
-		var data = {}
+		var data = { type: 'set', addons: {} }
 
 		for ( var guid in this.addon_status ) {
 			if ( this.addon_status[ guid ] != this.STAT_INSTALLED_NO_SYNC )
-				data[ guid ] = this.addons[guid]
+				data.addons[ guid ] = this.addons[guid]
 		}
 
 		this.call({
-			params: { type: 'set' },
 			data: data,
 
 			onSuccess: function( json ) {
@@ -492,30 +502,29 @@ var Siphon = {
 	//params, data, onSuccess, onFail
 		var $this = this
 
-		var params = {
-			type:     '',
-			version:  this.prefs.getCharPref( 'version' ),
-			rand: new Date().getTime()
-		}
+		var data = this.objMerge({ type: '' }, options.data || {} )
+
+		data.email    = data.email || this.prefs.getCharPref( 'email' )
+		data.password = data.password || this._login_info.password
 
 		if ( this.cryptEnabled() ) {
 			try {
-			params.crypt_email    = doEncrypt( this.prefs.getCharPref('encryption_keyid'), 0,
-											   this.prefs.getCharPref('encryption_pubkey'), this.prefs.getCharPref( 'email' ) )
+				data.crypt_email = doEncrypt( this.prefs.getCharPref('encryption_keyid'), 0,
+											  this.prefs.getCharPref('encryption_pubkey'), data.email )
 
-			params.crypt_password = doEncrypt( this.prefs.getCharPref('encryption_keyid'), 0,
-											   this.prefs.getCharPref('encryption_pubkey'), this._login_info.password )
+				data.crypt_password = doEncrypt( this.prefs.getCharPref('encryption_keyid'), 0,
+												 this.prefs.getCharPref('encryption_pubkey'), data.password )
+				delete data.email
+				delete data.passwd
 			} catch ( e ) {
 				console.write( 'Error: ecnryption failed: ' + e )
 				return
 			}
-		} else {
-			params.email    = this.prefs.getCharPref( 'email' )
-			params.password = this._login_info.password
 		}
 
-		return this.transport = new this.Request( this.apiURL(), this.objMerge( params, options.params || {} ), options.data || {} )
-		.start( function( json_str ) {
+		qstring = this.objMerge( { version:  this.prefs.getCharPref( 'version' ), rand: new Date().getTime() }, options.params || {} )
+
+		return this.transport = new this.Request( this.apiURL(), qstring, data ).start( function( json_str ) {
 
 			$this.transport = null
 
@@ -530,7 +539,7 @@ var Siphon = {
 					options_window.SiphonSettings.alertStatus( json.status_message )
 				}
 			} catch ( e ) {
-				console.write( "Error: " + e/* json_str */ )
+				console.write( "Error: "+data.type+": " + e + ': ' + json_str )
 			}
 
 			if ( json && json.retval == 0 ) {

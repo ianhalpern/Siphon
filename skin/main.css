@@ -69,6 +69,14 @@
 .new_addon {
 	background: #FFFF66;
 }
+
+.recommended_addon {
+	background: #FFCC66;
+}
+
+.recommended_addon .recommended {
+	font-style: italic;
+}
 /*#BrowserPreferences radio[pane=paneSecurity] {
   list-style-image: url("chrome://browser/skin/preferences/Options.png");
   -moz-image-region: rect(0px, 192px,  32px, 160px)

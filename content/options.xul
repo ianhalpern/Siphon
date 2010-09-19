@@ -64,6 +64,7 @@
 		<preferences>
 			<preference id="pref-email" name="extensions.siphon.email" type="string" />
 			<preference id="pref-hide-status-bar" name="extensions.siphon.hide_status_bar" type="bool" />
+			<preference id="pref-enable-recommended" name="extensions.siphon.enable_recommended" type="bool" />
 		</preferences>
 
 		<groupbox style=" overflow: hidden">
@@ -112,6 +113,10 @@
 				<groupbox>
 					<hbox align="center">
 						<checkbox preference="pref-hide-status-bar" label="Hide status bar icon when all add-ons are installed"/>
+						<spacer flex="1" />
+					</hbox>
+					<hbox align="center">
+						<checkbox preference="pref-enable-recommended" label="Enable addon recommendations"/>
 						<spacer flex="1" />
 					</hbox>
 				</groupbox>

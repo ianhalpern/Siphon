@@ -233,18 +233,17 @@ var SiphonSettings = {
 		try {
 		//Siphon.resetPrefs()
 		//Siphon.unsetFirstRun()
-		Siphon.prefs.setCharPref( "email", document.getElementById("s-email").value )
-		Siphon.setLoginInfo( document.getElementById("s-password").value )
+			Siphon.prefs.setCharPref( "email", document.getElementById("s-email").value )
+			Siphon.setLoginInfo( document.getElementById("s-password").value )
+			Siphon.optionsWindow().SiphonSettings.onSyncCommand()
 		//this.setSignUpSucceededUI()
-		//this.onSyncCommand()
-		window.close()
 
 		} catch ( e ) { alert( e ) }
 	},
 
 	onSyncCommand: function() {
-		SiphonInstaller.onSyncCommand()
 		document.documentElement.showPane( document.getElementById( 'pane-installer' ) )
+		SiphonInstaller.onSyncCommand()
 	},
 
 	onServerConfigureCommand: function() {
@@ -258,8 +257,8 @@ var SiphonSettings = {
 
 	onCreateAccountCommand: function() {
 		var features = "chrome,titlebar,centerscreen,resizable"
-		var win = window.openDialog( "chrome://siphon/content/create-account.xul", "Create a Siphon Account", features )
-		win.addEventListener( "unload", function() {
+		this.signup_win = window.openDialog( "chrome://siphon/content/create-account.xul", "Create a Siphon Account", features )
+		this.signup_win.addEventListener( "unload", function() {
 			Siphon.findLoginInfo()
 			SiphonSettings.redraw()
 		}, false )
@@ -276,12 +275,21 @@ var SiphonInstaller = {
 
 	draw: function() {
 		var found = false
-		var sorted_addons = [ [], [], [], [], [] ]
+		var sorted_addons = [ [], [], [], [], [], [] ]
 		var used_addons = {}
+
+		if ( Siphon.prefs.getBoolPref('enable_recommended') )
+			for ( var guid in Siphon.recommended ) {
+				sorted_addons[ 5 ].push( guid )
+				console.write( "Recommend: " + guid )
+				break
+			}
+
 		for ( var i = 0; i < Siphon.new_addons.length; i++ ) {
 			sorted_addons[ 4 ].push( Siphon.new_addons[i] )
 			used_addons[ Siphon.new_addons[i] ] = true
 		}
+
 		for ( var guid in Siphon.addon_status ) {
 			if ( !used_addons[ guid ] ) {
 				sorted_addons[ Siphon.addon_status[guid] - 1 ].push( guid )
@@ -298,17 +306,11 @@ var SiphonInstaller = {
 			for ( var j = 0; j < sorted_addons[i].length; j++ ) {
 				var guid = sorted_addons[i][j]
 
-				var keys = []
-				for ( var key in Siphon.addons[ guid ] )
-					keys.push( key +':'+Siphon.addons[ guid ][key] )
-				console.write( keys )
-
 				document.getElementById('siphon_addon_listbox').appendChild(
 					this.createAddonListitem(
-						Siphon.addons[ guid ].name,
 						//Siphon.uninstalled_addons[ i ].version,
-						Siphon.addons[ guid ].id,
-						i == sorted_addons.length - 1
+						i != 5 ? Siphon.addons[guid] : Siphon.recommended[guid],
+						i
 					)
 				)
 			}
@@ -325,20 +327,26 @@ var SiphonInstaller = {
 		this.draw()
 	},
 
-	createAddonListitem: function( name, guid, is_new ) {
+	createAddonListitem: function( addon_info, type ) {
+		console.write( "addon_info: " + addon_info )
+		var guid = addon_info.id
 
 		var list_item = document.createElement( 'richlistitem' )
 		list_item.setAttribute( "align", "center" )
 		list_item.setAttribute( "id", guid )
-		if ( is_new ) {
+		if ( type == 4 ) {
 			list_item.setAttribute( "class", "new_addon" )
 			list_item.addEventListener( "click", function() {
 				list_item.setAttribute( "class", "" )
 			}, false )
 		}
 
+		if ( type == 5 ) {
+			list_item.setAttribute( "class", "recommended_addon" )
+		}
+
 		var icon = document.createElement( "image" )
-		icon.setAttribute( "src", Siphon.addons[guid].iconURL || "chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png" )
+		icon.setAttribute( "src", addon_info.iconURL || "chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png" )
 		list_item.appendChild( icon )
 
 		var name_box = document.createElement( "box" )
@@ -347,8 +355,15 @@ var SiphonInstaller = {
 
 		var addon_name = document.createElement( 'label' )
 		addon_name.setAttribute( "class", "addon_name" )
-		addon_name.setAttribute( "value", name )
+		addon_name.setAttribute( "value", addon_info.name )
+
+		if ( addon_info.link ) {
+			addon_name.setAttribute( "href", addon_info.link )
+			addon_name.setAttribute( "class", "addon_name text-link" )
+		}
+
 		name_box.appendChild( addon_name )
+
 
 		//var version_box = document.createElement( "box" )
 		//version_box.setAttribute( "style", "overflow:hidden; width: 40px; whitespace: nowrap" )
@@ -361,6 +376,13 @@ var SiphonInstaller = {
 		var spacer = document.createElement( 'spacer' )
 		spacer.setAttribute( "flex", "1" )
 		list_item.appendChild( spacer )
+
+		if ( type == 5 ) {
+			var recommended = document.createElement( 'label' )
+			recommended.setAttribute( "class", "recommended" )
+			recommended.setAttribute( "value", "Recommended" )
+			list_item.appendChild( recommended )
+		}
 
 		var throbber = document.createElement( 'image' )
 		throbber.style.visibility = 'hidden'
@@ -388,7 +410,8 @@ var SiphonInstaller = {
 
 		checkbox.addEventListener( "command", onChecked, false )
 
-		list_item.appendChild( checkbox )
+		if ( type != 5 )
+			list_item.appendChild( checkbox )
 
 		var install_btn = document.createElement( 'button' )
 
@@ -435,7 +458,8 @@ var SiphonInstaller = {
 			list_item.remove()
 		}, false )
 
-		list_item.appendChild( delete_btn )
+		if ( type != 5 )
+			list_item.appendChild( delete_btn )
 
 		if ( Siphon.addon_status[ guid ] == Siphon.STAT_NOT_INSTALLED_IGNORED || Siphon.addon_status[ guid ] == Siphon.STAT_INSTALLED )
 			checkbox.setAttribute( "checked", true )
@@ -481,13 +505,13 @@ var SiphonInstaller = {
 	},
 
 	onSyncCommand: function() {
+		console.write( 'onSyncCommand' )
 		try {
-			Siphon.prefs.setCharPref( "email", document.getElementById("l-email").value )
-			Siphon.prefs.setCharPref( "password", document.getElementById("l-password").value )
 			this.setSyncingUI()
+			$this = this
 			Siphon.synchronize(
-				function(retval){SiphonInstaller.onSyncSucceeded(retval)},
-				function(retval){SiphonInstaller.onSyncFailed(retval)}
+				function(retval){$this.onSyncSucceeded(retval)},
+				function(retval){$this.onSyncFailed(retval)}
 			)
 		} catch ( e ) { alert ( e ) }
 	},
@@ -499,6 +523,10 @@ var SiphonInstaller = {
 
 	onSyncSucceeded: function( retval ) {
 		this.setSyncStoppedUI()
+		if ( SiphonSettings.signup_win ) {
+			SiphonSettings.signup_win.close()
+			delete SiphonSettings.signup_win
+		}
 	//	this.alertSyncStatus( "Synchronize Succeeded" )
 	},
 
