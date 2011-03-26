@@ -34,8 +34,8 @@ rdf = """<?xml version="1.0"?>
 		<em:targetApplication>
 		  <Description>
 			<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-			<em:minVersion>3.0</em:minVersion>
-			<em:maxVersion>4.0b4pre</em:maxVersion>
+			<em:minVersion>4.0</em:minVersion>
+			<em:maxVersion>4.0.*</em:maxVersion>
 		  </Description>
 		</em:targetApplication>
 

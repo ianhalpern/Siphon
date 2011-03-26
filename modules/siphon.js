@@ -25,7 +25,7 @@ Components.utils.import('resource://siphon/modules/console.js')
 console.verbose = true
 console.prefix = 'Siphon: '
 Components.utils.import('resource://siphon/modules/crypt/PGencode.js')
-
+Components.utils.import("resource://gre/modules/AddonManager.jsm");
 //Components.utils.import('resource://siphon/modules/crypt/rsa.js')
 //Components.utils.import('resource://siphon/modules/crypt/aes-enc.js')
 //Components.utils.import('resource://siphon/modules/crypt/base64.js')
@@ -49,8 +49,8 @@ var Siphon = {
 	addon_status: null,
 	recommended: null,
 
-	em: Components.classes[ "@mozilla.org/extensions/manager;1" ]
-	  .getService( Components.interfaces.nsIExtensionManager ),
+	//em: Components.classes[ "@mozilla.org/extensions/manager;1" ]
+	//  .getService( Components.interfaces.nsIExtensionManager ),
 
 	prefs: Components.classes[ "@mozilla.org/preferences-service;1" ]
 	  .getService( Components.interfaces.nsIPrefService ).getBranch( "extensions.siphon." ),
@@ -299,17 +299,21 @@ var Siphon = {
 				return// Error, mal-formatted RDF xml
 			}
 
-			var win = Components.classes[ '@mozilla.org/appshell/window-mediator;1' ]
-			  .getService( Components.interfaces.nsIWindowMediator )
-			  .getMostRecentWindow( 'navigator:browser' )
+			//var win = Components.classes[ '@mozilla.org/appshell/window-mediator;1' ]
+			//  .getService( Components.interfaces.nsIWindowMediator )
+			//  .getMostRecentWindow( 'navigator:browser' )
 
-			win.openUILinkIn( xpi_url, 'current' )
+			//win.openUILinkIn( xpi_url, 'current' )
 
-			if ( options_window )
-				options_window.SiphonInstaller.onInstallWindowOpened( guid )
+			AddonManager.getInstallForURL( xpi_url, function(aInstall) {
+				aInstall.install()
+
+				if ( options_window )
+					options_window.SiphonInstaller.onInstallWindowOpened( guid )
+			}, "application/x-xpinstall")
 			//$this.addon_status[ guid ] = $this.STAT_INSTALLED
 			//$this.prefs.setCharPref( 'addon_status', JSON.stringify( $this.addon_status ) )
-			//$this.syncronize()
+			//$this.synchronize()
 			//$this.updateStatusbars()
 		} )
 
@@ -330,7 +334,7 @@ var Siphon = {
 	syncAddon: function( guid ) {
 		this.addon_status[ guid ] = this.STAT_INSTALLED
 		this.prefs.setCharPref( 'addon_status', JSON.stringify( this.addon_status ) )
-		this._syncronize_set()
+		this._synchronize_set()
 		this.updateStatusbars()
 	},
 
@@ -341,15 +345,20 @@ var Siphon = {
 	},
 
 	deleteAddon: function( guid ) {
+		$this = this
 		if ( this.addon_status[ guid ] == this.STAT_INSTALLED ) {
-			try {
-				this.em.uninstallItem( guid )
-				Siphon.deleted_addons[guid] = true
-			} catch ( e ) {}
+			this.uninstallAddon( guid )
 		}
+		this._synchronize_set()
+	},
+
+	uninstallAddon: function( guid ) {
+		Siphon.deleted_addons[guid] = true
 		delete this.addon_status[ guid ]
 		this.prefs.setCharPref( 'addon_status', JSON.stringify( this.addon_status ) )
-		this._syncronize_set()
+		AddonManager.getAddonByID( guid, function ( addon ) {
+			addon.uninstall()
+		})
 	},
 
 	unsetFirstRun: function() {
@@ -376,7 +385,7 @@ var Siphon = {
 	synchronize: function( onSuccess, onFail ) {
 
 		this.checkForAccountChanges()
-
+		console.write('call')
 		this.new_addons = []
 		this.call({
 			data: { type: 'get' },
@@ -390,82 +399,13 @@ var Siphon = {
 					this.recommended = json.recommended
 
 				console.write( this.recommended )
-				var installed_addons = this.em.getItemList( 2, [] )
-
-				var addon_mode = {}
-				for ( var i = 0; i < installed_addons.length; i++ ) {
-					if ( !this.deleted_addons[ installed_addons[ i ].id] ) {
-						addon_mode[ installed_addons[ i ].id ] = 1
-						this.addons[ installed_addons[ i ].id ] = installed_addons[ i ]
+				console.write( 'call success' )
+				AddonManager.getAllAddons( function( $this ) {
+					return function( installed_addons ) {
+						console.write('hello')
+						$this._synchronize( onSuccess, onFail, json, installed_addons )
 					}
-				}
-
-				for ( var guid in this.addon_status ) {
-					if ( !addon_mode[ guid ] ) addon_mode[ guid ] = 0
-
-					if ( this.addon_status[ guid ] == this.STAT_NOT_INSTALLED_IGNORED || this.addon_status[ guid ] == this.STAT_NOT_INSTALLED ) {
-						if ( !addon_mode[ guid ] && json.addons[guid] ) addon_mode[ guid ] += 1
-						else if ( addon_mode[ guid ] ) addon_mode[ guid ] -= 2
-					}
-					addon_mode[ guid ] += 2
-
-					if ( this.addon_status[ guid ] == this.STAT_INSTALLED_NO_SYNC )
-						addon_mode[ guid ] += 4
-				}
-
-				var n = 0
-				for ( var guid in json.addons ) {
-					if ( this.addon_status[ guid ] != this.STAT_INSTALLED_NO_SYNC ) {
-						if ( !this.addons[ guid ] ) this.addons[ guid ] = json.addons[ guid ]
-						if ( !addon_mode[ guid ] ) addon_mode[ guid ] = 0
-						addon_mode[ guid ] += 4
-					}
-					n++
-				}
-				console.write("sync get: " + n )
-
-				/*     | 1  2  3  |
-				 *     |--------------
-				 *  0  | 0  0  0  |  0
-				 *  1  | 1  0  0  |  1
-				 *  2  | 0  1  0  |  0
-				 *  3  | 1  1  0  |  0
-				 *  4  | 0  0  1  |  1
-				 *  5  | 1  0  1  |  1
-				 *  6  | 0  1  1  |  0
-				 *  7  | 1  1  1  |  1
-				 *
-				 */
-				for ( var guid in addon_mode ) {
-					console.write( guid + ' ' + addon_mode[ guid ] )
-					switch( addon_mode[ guid ] ) {
-						case 1:
-						case 5:
-							this.addon_status[ guid ] = this.STAT_INSTALLED
-							console.write( guid + ' installed' )
-							break
-						case 3:
-							this.em.uninstallItem( guid )
-							this.deleted_addons[guid] = true
-						case 2:
-						case 6:
-							delete this.addon_status[ guid ]
-							console.write( guid + ' deleted' )
-							break
-						case 4:
-							if ( !this.addon_status[ guid ] ) this.new_addons.push( guid )
-							this.addon_status[ guid ] = this.STAT_NOT_INSTALLED
-							console.write( guid + ' want install' )
-							break
-						case 7:
-							console.write( guid + ' already synced' )
-							break
-					}
-				}
-
-				this.prefs.setCharPref( 'addon_status', JSON.stringify( this.addon_status ) )
-				this._syncronize_set( onSuccess, onFail )
-
+				}( this ) )
 			},
 
 			onFail: function( json ) {
@@ -474,13 +414,100 @@ var Siphon = {
 		})
 	},
 
-	_syncronize_set: function( onSuccess, onFail ) {
+	_synchronize: function( onSuccess, onFail, json, installed_addons ) {
+		console.write( 'synchronizing' )
+		var keys = ''
+		for ( var key in installed_addons[0] )
+			keys +=  key + ', '
+		console.write( keys )
+		var addon_mode = {}
+		for ( var i = 0; i < installed_addons.length; i++ ) {
+			console.write( installed_addons[i].name + ' type:' + installed_addons[i].type )
+			if ( installed_addons[i].type == 'extension' && !this.deleted_addons[ installed_addons[ i ].id] ) {
+				addon_mode[ installed_addons[ i ].id ] = 1
+				this.addons[ installed_addons[ i ].id ] = installed_addons[ i ]
+			}
+		}
+
+		for ( var guid in this.addon_status ) {
+			if ( !addon_mode[ guid ] ) addon_mode[ guid ] = 0
+
+			if ( this.addon_status[ guid ] == this.STAT_NOT_INSTALLED_IGNORED || this.addon_status[ guid ] == this.STAT_NOT_INSTALLED ) {
+				if ( !addon_mode[ guid ] && json.addons[guid] ) addon_mode[ guid ] += 1
+				else if ( addon_mode[ guid ] ) addon_mode[ guid ] -= 2
+			}
+			addon_mode[ guid ] += 2
+
+			if ( this.addon_status[ guid ] == this.STAT_INSTALLED_NO_SYNC )
+				addon_mode[ guid ] += 4
+		}
+
+		var n = 0
+		for ( var guid in json.addons ) {
+			if ( this.addon_status[ guid ] != this.STAT_INSTALLED_NO_SYNC ) {
+				if ( !this.addons[ guid ] ) this.addons[ guid ] = json.addons[ guid ]
+				if ( !addon_mode[ guid ] ) addon_mode[ guid ] = 0
+				addon_mode[ guid ] += 4
+			}
+			n++
+		}
+		console.write("sync get: " + n )
+
+		/*     | 1  2  3  |
+		 *     |--------------
+		 *  0  | 0  0  0  |  0
+		 *  1  | 1  0  0  |  1
+		 *  2  | 0  1  0  |  0
+		 *  3  | 1  1  0  |  0
+		 *  4  | 0  0  1  |  1
+		 *  5  | 1  0  1  |  1
+		 *  6  | 0  1  1  |  0
+		 *  7  | 1  1  1  |  1
+		 *
+		 */
+		for ( var guid in addon_mode ) {
+			console.write( guid + ' ' + addon_mode[ guid ] )
+			switch( addon_mode[ guid ] ) {
+				case 1:
+				case 5:
+					this.addon_status[ guid ] = this.STAT_INSTALLED
+					console.write( guid + ' installed' )
+					break
+				case 3:
+					this.uninstallAddon( guid )
+					//this.em.uninstallItem( guid )
+					//this.deleted_addons[guid] = true
+				case 2:
+				case 6:
+					delete this.addon_status[ guid ]
+					console.write( guid + ' deleted' )
+					break
+				case 4:
+					if ( !this.addon_status[ guid ] ) this.new_addons.push( guid )
+					this.addon_status[ guid ] = this.STAT_NOT_INSTALLED
+					console.write( guid + ' want install' )
+					break
+				case 7:
+					console.write( guid + ' already synced' )
+					break
+			}
+		}
+
+		this.prefs.setCharPref( 'addon_status', JSON.stringify( this.addon_status ) )
+		this._synchronize_set( onSuccess, onFail )
+	},
+
+	_synchronize_set: function( onSuccess, onFail ) {
 
 		var data = { type: 'set', addons: {} }
 
 		for ( var guid in this.addon_status ) {
 			if ( this.addon_status[ guid ] != this.STAT_INSTALLED_NO_SYNC )
-				data.addons[ guid ] = this.addons[guid]
+				data.addons[ guid ] = {
+					id: this.addons[guid].id,
+					name: this.addons[guid].id,
+					version: this.addons[guid].version
+				}
 		}
 
 		this.call({
@@ -648,13 +675,18 @@ Siphon.Request.prototype = {
 	start: function( callback ) {
 
 		this._callback = callback
-
+		console.write('http request start')
 		var request = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
+		console.write('http request here 1: ' + this._url + this.encode( this._params ))
 		request.open('POST', this._url + this.encode( this._params ), true);
+		console.write('http request here 2')
 		request.setRequestHeader('Content-Type','text/json; charset=utf-8');
+		console.write('http request here 3: '+JSON.stringify( this._data ))
 		request.send( JSON.stringify( this._data ) );
+		console.write('http request sent')
 
 		request.onreadystatechange = function() {
+			console.write('http request state change: ' + request.readyState)
 			if ( request.readyState == 4 ) {
 				callback( request.responseText )
 			}

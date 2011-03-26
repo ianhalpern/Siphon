@@ -269,6 +269,8 @@ var SiphonInstaller = {
 
 	installing: {},
 
+	install_btns: [],
+
 	init: function() {
 		this.draw()
 	},
@@ -302,6 +304,8 @@ var SiphonInstaller = {
 			this.clear()
 		}
 
+	//	var spacer = document.createElement( 'spacer' )
+	//	spacer.setAttribute( "flex", "1")
 		for ( var i = sorted_addons.length - 1; i >= 0; i-- ) {
 			for ( var j = 0; j < sorted_addons[i].length; j++ ) {
 				var guid = sorted_addons[i][j]
@@ -315,11 +319,13 @@ var SiphonInstaller = {
 				)
 			}
 		}
+	//	document.getElementById('siphon_addon_listbox').appendChild( spacer )
 	},
 
 	clear: function() {
 		while ( document.getElementById( 'siphon_addon_listbox' ).hasChildNodes() )
 			document.getElementById( 'siphon_addon_listbox' ).removeChild( document.getElementById( 'siphon_addon_listbox' ).childNodes[ 0 ] )
+		this.install_btns = []
 	},
 
 	redraw: function() {
@@ -350,7 +356,7 @@ var SiphonInstaller = {
 		list_item.appendChild( icon )
 
 		var name_box = document.createElement( "box" )
-		name_box.setAttribute( "style", "overflow:hidden; width: 220px; whitespace: nowrap" )
+		name_box.setAttribute( "style", "overflow:hidden; width: 220px; white-space: nowrap" )
 		list_item.appendChild( name_box )
 
 		var addon_name = document.createElement( 'label' )
@@ -366,7 +372,7 @@ var SiphonInstaller = {
 
 
 		//var version_box = document.createElement( "box" )
-		//version_box.setAttribute( "style", "overflow:hidden; width: 40px; whitespace: nowrap" )
+		//version_box.setAttribute( "style", "overflow:hidden; width: 40px; white-space: nowrap" )
 		//list_item.appendChild( version_box )
 
 		//var addon_version = document.createElement( 'label' )
@@ -414,6 +420,8 @@ var SiphonInstaller = {
 			list_item.appendChild( checkbox )
 
 		var install_btn = document.createElement( 'button' )
+		if ( type != 5 )
+			this.install_btns.push( install_btn )
 
 		if ( Siphon.addon_status[ guid ] == Siphon.STAT_INSTALLED || Siphon.addon_status[ guid ] == Siphon.STAT_INSTALLED_NO_SYNC ) {
 			install_btn.setAttribute( "label", "Installed" )
@@ -455,7 +463,7 @@ var SiphonInstaller = {
 		delete_btn.addEventListener( "command", function( e ) {
 			Siphon.deleteAddon( guid )
 			throbber.style.visibility = 'visible'
-			list_item.remove()
+			list_item.parentNode.removeChild( list_item )
 		}, false )
 
 		if ( type != 5 )
@@ -465,6 +473,13 @@ var SiphonInstaller = {
 			checkbox.setAttribute( "checked", true )
 
 		return list_item
+	},
+
+	onInstallAllCommand: function() {
+		for ( var i = 0; i < this.install_btns.length; i++ ) {
+			if ( this.install_btns[i].getAttribute( "disabled" ) != "true" )
+				this.install_btns[i].click()
+		}
 	},
 
 	onInstallWindowOpened: function( guid ) {

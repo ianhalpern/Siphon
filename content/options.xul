@@ -32,15 +32,18 @@
   onunload="Siphon.settingsDialogClosed()"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<prefpane id="pane-installer" label="Installer" style="padding-bottom: 0; margin-bottom: 0;">
+	<prefpane id="pane-installer" label="Installer" style="padding-bottom: 0; margin-bottom: 0;" image="chrome://siphon/content/icons/icon-32x32.png">
 		<preferences></preferences>
 
 		<vbox style="">
 			<hbox align="center" style="padding-bottom:10px">
-				<image src="chrome://siphon/content/icons/icon-32x32.png" />
+			<!--	<image src="chrome://siphon/content/icons/icon-32x32.png" />-->
 				<label value="&installer.label;" style="font-weight: bold; font-size: 14px;"/>
+				<spacer flex="1" />
+				<button label="Install All"
+					oncommand="SiphonInstaller.onInstallAllCommand( this )"/>
 			</hbox>
-			<richlistbox id="siphon_addon_listbox" style='overflow: auto; height: 310px;'>
+			<richlistbox id="siphon_addon_listbox" style="overflow: auto; height:310px" flex="2" equalsize="always">
 				<richlistitem align="center">
 					<label id="siphon_addon_listbox_loading" value="Loading..." style="font-weight: bold;" />
 				</richlistitem>
