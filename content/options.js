@@ -32,6 +32,8 @@ var SiphonSettings = {
 		var hostname = Siphon.hostname()
 		document.getElementById( "server-settings-label" ).setAttribute( "value", hostname )
 		document.getElementById( "server-settings-label" ).setAttribute( "href", hostname )
+		document.getElementById( "server-settings-secure-label" ).setAttribute( "value",
+		  Siphon.prefs.getBoolPref( "encryption_enabled" ) ? '(Secure)' : '' )
 		document.getElementById( "l-password" ).value = Siphon._login_info.password
 		//this.updateStatus()
 	},
@@ -194,11 +196,37 @@ var SiphonSettings = {
 		document.getElementById( "signup-vbox" ).style.display = "none"
 	},*/
 
-	onForgotCommand: function() {
+	onForgotCommand: function( btn ) {
+		this.updateSettingsFromUI()
 		var $this = this
-		Siphon.onForgotCommand( function() {
-			//$this.alertSyncStatus( "You have been sent an email." )
-		} )
+		var orig_value = btn.getAttribute( 'label' )
+
+		btn.setAttribute( 'label', 'Sending Request' )
+		btn.setAttribute( 'disabled', 'true' )
+
+		var callback = function() {
+			btn.setAttribute( 'label', orig_value )
+			btn.setAttribute( 'disabled', 'false' )
+		}
+		Siphon.onForgotCommand( callback, callback )
+	},
+
+	onDeleteAccountCommand: function( btn ) {
+		this.updateSettingsFromUI()
+		var $this = this
+		var orig_value = btn.getAttribute( 'label' )
+
+		btn.setAttribute( 'label', 'Sending Request' )
+		btn.setAttribute( 'disabled', 'true' )
+
+		var callback = function() {
+			btn.setAttribute( 'label', orig_value )
+			btn.setAttribute( 'disabled', 'false' )
+		}
+		Siphon.onDeleteCommand( function() {
+			document.getElementById('l-password').value = ''
+			callback()
+		}, callback )
 	},
 
 	onSignUpChange: function() {
@@ -210,6 +238,7 @@ var SiphonSettings = {
 	},
 
 	onSignUpCommand: function() {
+		if ( !this.validateSignUpText() ) return
 		try {
 			this.setSigningUpUI()
 			this.validateSignUpInfo(
@@ -217,7 +246,7 @@ var SiphonSettings = {
 					SiphonSettings.onSignUpSucceeded();
 				//	SiphonSettings.setSignUpSucceededUI();
 				},
-				function(){SiphonSettings.setSignUpFailedUI()}
+				function(){SiphonSettings.setSignUpFailedUI();}
 			)
 		} catch(e) {
 			alert(e)
@@ -233,15 +262,24 @@ var SiphonSettings = {
 		try {
 		//Siphon.resetPrefs()
 		//Siphon.unsetFirstRun()
-			Siphon.prefs.setCharPref( "email", document.getElementById("s-email").value )
-			Siphon.setLoginInfo( document.getElementById("s-password").value )
+		//	Siphon._email = false
+		Siphon.prefs.setCharPref( "email", document.getElementById("s-email").value )
+		Siphon.setLoginInfo( document.getElementById("s-password").value )
 			Siphon.optionsWindow().SiphonSettings.onSyncCommand()
 		//this.setSignUpSucceededUI()
 
 		} catch ( e ) { alert( e ) }
 	},
 
+	updateSettingsFromUI: function() {
+		Siphon.prefs.setCharPref( "email", document.getElementById("l-email").value )
+		Siphon.prefs.setBoolPref( "hide_status_bar", document.getElementById("hide-status-bar-cb").checked )
+		Siphon.prefs.setBoolPref( "enable_recommended", document.getElementById("enable-recommended-bar-cb").checked )
+		Siphon.setLoginInfo( document.getElementById("l-password").value )
+	},
+
 	onSyncCommand: function() {
+		this.updateSettingsFromUI()
 		document.documentElement.showPane( document.getElementById( 'pane-installer' ) )
 		SiphonInstaller.onSyncCommand()
 	},
@@ -356,7 +394,7 @@ var SiphonInstaller = {
 		list_item.appendChild( icon )
 
 		var name_box = document.createElement( "box" )
-		name_box.setAttribute( "style", "overflow:hidden; width: 220px; white-space: nowrap" )
+		name_box.setAttribute( "style", "overflow:hidden; width: 210px; white-space: nowrap" )
 		list_item.appendChild( name_box )
 
 		var addon_name = document.createElement( 'label' )

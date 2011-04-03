@@ -48,7 +48,6 @@ var Siphon = {
 	addons: null,
 	addon_status: null,
 	recommended: null,
-
 	//em: Components.classes[ "@mozilla.org/extensions/manager;1" ]
 	//  .getService( Components.interfaces.nsIExtensionManager ),
 
@@ -154,35 +153,33 @@ var Siphon = {
 		var logins = this.login_manager.findLogins( {}, this.hostname(), this.prefs.getCharPref( "api_url" ), null )
 
 		// Find user from returned array of nsILoginInfo objects
-		for ( var i = 0; i < logins.length; i++ ) {
-			if ( logins[i].username == this.prefs.getCharPref( 'email' ) ) {
-				this._login_info = logins[i]
-				return
-			}
-		}
-
-		this._login_info = new this.login_info( this.hostname(), this.prefs.getCharPref( "api_url" ), null,
-			this.prefs.getCharPref( 'email' ), "", "", "" )
+		if ( logins.length )
+			this._login_info = logins[0]
+		else
+			this._login_info = new this.login_info( this.hostname(), this.prefs.getCharPref( "api_url" ), null,
+				this.prefs.getCharPref( 'email' ), "", "", "" )
 		return
 	},
 
 	setLoginInfo: function( password ) {
-		this.findLoginInfo()
+		if ( password ) {
+			this.findLoginInfo()
 
-		var new_login_info = new this.login_info( this.hostname(), this.prefs.getCharPref( "api_url" ), null,
-		  this.prefs.getCharPref( 'email' ), password, "", "" )
-
-		if ( new_login_info.password ) {
+			var new_login_info = new this.login_info( this.hostname(), this.prefs.getCharPref( "api_url" ), null,
+			  this.prefs.getCharPref( 'email' ), password, "", "" )
+			console.write(new_login_info.hostname + ', ' + new_login_info.formSubmitURL + ', ' + new_login_info.password )
 			if ( new_login_info.hostname == this._login_info.hostname
-			&& new_login_info.formSubmitURL == this._login_info.formSubmitURL && this._login_info.password )
+			&& new_login_info.formSubmitURL == this._login_info.formSubmitURL && this._login_info.password ) {
+				console.write( 'modify' )
 				this.login_manager.modifyLogin( this._login_info, new_login_info )
+			}
 			else
 				this.login_manager.addLogin( new_login_info )
+
+			this._login_info = new_login_info
+
+			this.checkForAccountChanges()
 		}
-
-		this._login_info = new_login_info
-
-		this.checkForAccountChanges()
 	},
 
 	resetServerPrefs: function() {
@@ -251,6 +248,18 @@ var Siphon = {
 		this.call({ data: { type: "forgot" }, onSuccess: onSuccess, onFail: onFail })
 	},
 
+	onDeleteCommand: function( onSuccess, onFail ) {
+		$this = this
+		this.call({ data: { type: "delete" }, onSuccess: function() {
+			$this.prefs.clearUserPref( 'email' )
+			$this._email = false
+			$this.login_manager.removeLogin( this._login_info )
+			$this.findLoginInfo()
+			$this.checkForAccountChanges()
+			onSuccess()
+		}, onFail: onFail })
+	},
+
 	onGetAddonCommand: function( guid ) {
 		this.installAddon( guid )
 	},
@@ -260,7 +269,7 @@ var Siphon = {
 			+ "reqVersion=1"
 			+ "&id=%ITEM_ID%"
 			+ "&version=%ITEM_VERSION%"
-			+ "&maxAppVersion=%ITEM_MAXAPPVERSION%"
+		//	+ "&maxAppVersion=%ITEM_MAXAPPVERSION%"
 			+ "&status=userEnabled"
 			+ "&appID=%APP_ID%"
 			+ "&appVersion=%APP_VERSION%"
@@ -272,13 +281,17 @@ var Siphon = {
 		var addon, $this = this
 
 		addon = this.addons[ guid ]
+		console.write( addon + ": " + guid )
+		if ( !addon ) {
+			if ( this.recommended.id = guid )
+				addon = this.recommended
+			else return
+		}
 
-		if ( !addon ) return
-
-		var url = ( this.addons[ guid ].updateRDF || this.default_update_rdf )
+		var url = ( addon.updateRDF || this.default_update_rdf )
 			.replace( '%ITEM_ID%', addon.id )
 			.replace( '%ITEM_VERSION%', addon.version )
-			.replace( '%ITEM_MAXAPPVERSION%', addon.maxAppVersion )
+		//	.replace( '%ITEM_MAXAPPVERSION%', addon.maxAppVersion )
 			.replace( '%APP_ID%', this.app_id )
 			.replace( '%APP_VERSION%', this.app_version )
 			.replace( '%APP_OS%', this.app_OS )
@@ -402,7 +415,6 @@ var Siphon = {
 				console.write( 'call success' )
 				AddonManager.getAllAddons( function( $this ) {
 					return function( installed_addons ) {
-						console.write('hello')
 						$this._synchronize( onSuccess, onFail, json, installed_addons )
 					}
 				}( this ) )
@@ -506,7 +518,8 @@ var Siphon = {
 				data.addons[ guid ] = {
 					id: this.addons[guid].id,
 					name: this.addons[guid].id,
-					version: this.addons[guid].version
+					version: this.addons[guid].version,
+					updateRDF: this.addons[guid].updateRDF
 				}
 		}
 
@@ -675,18 +688,12 @@ Siphon.Request.prototype = {
 	start: function( callback ) {
 
 		this._callback = callback
-		console.write('http request start')
 		var request = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].createInstance();
-		console.write('http request here 1: ' + this._url + this.encode( this._params ))
 		request.open('POST', this._url + this.encode( this._params ), true);
-		console.write('http request here 2')
 		request.setRequestHeader('Content-Type','text/json; charset=utf-8');
-		console.write('http request here 3: '+JSON.stringify( this._data ))
 		request.send( JSON.stringify( this._data ) );
-		console.write('http request sent')
 
 		request.onreadystatechange = function() {
-			console.write('http request state change: ' + request.readyState)
 			if ( request.readyState == 4 ) {
 				callback( request.responseText )
 			}

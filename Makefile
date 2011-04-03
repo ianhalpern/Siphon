@@ -16,6 +16,19 @@ make:
 	mv $(BUILD_DIR)/$(FNAME).zip $(BUILD_DIR)/$(FNAME).xpi
 	@echo "REMEMBER: Update links to http://siphon-fx.com."
 	@echo "REMEMBER: Update version number in defaults/preferences/defaults.js."
+	@echo "REMEMBER: FIX FIRST RUN"
+
+test:
+	mkdir -p $(BUILD_DIR)/$(FNAME)-test
+	build_rdf.py $(VERSION)
+	cp -r $(REQ_FILES) $(REQ_DIRS) $(XTRA_FILES) $(BUILD_DIR)/$(FNAME)-test
+	echo $(VERSION) > $(BUILD_DIR)/$(FNAME)-test/VERSION
+	cd $(BUILD_DIR)/$(FNAME)-test && zip -r ../$(FNAME)-test.zip *
+	mv $(BUILD_DIR)/$(FNAME)-test.zip $(BUILD_DIR)/$(FNAME)-test.xpi
+	@echo "REMEMBER: Update links to http://siphon-fx.com."
+	@echo "REMEMBER: Update version number in defaults/preferences/defaults.js."
+	@echo "REMEMBER: FIX FIRST RUN"
+
 
 rdf:
 	build_rdf.py $(VERSION)

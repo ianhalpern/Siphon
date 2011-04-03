@@ -29,6 +29,9 @@
 <prefwindow
   id="siphon-preferences"
   title="&options.title;"
+  buttons="cancel"
+  buttonlabelcancel="Close"
+  ondialogcancel="SiphonSettings.updateSettingsFromUI()"
   onunload="Siphon.settingsDialogClosed()"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
@@ -71,12 +74,15 @@
 		</preferences>
 
 		<groupbox style=" overflow: hidden">
+			<button id="forgot-btn" style="font-size:1.2em" label="Create a New Account" oncommand="SiphonSettings.onCreateAccountCommand()"/>
+			<separator />
 			<hbox>
 				<caption label="Server" />
 			</hbox>
 			<groupbox>
 				<hbox align="center">
 					<label class="text-link" id="server-settings-label" value=""/>
+					<label id="server-settings-secure-label" value=""/>
 					<button label="Configure" oncommand="SiphonSettings.onServerConfigureCommand()"/>
 					<spacer flex="1" />
 				</hbox>
@@ -90,22 +96,22 @@
 				<groupbox>
 					<hbox align="center">
 						<label style="width:100px" control="l-email" value="&options.panemain.email;:"/>
-						<textbox id="l-email" preference="pref-email" onchange="Siphon.setLoginInfo( document.getElementById('l-password').value )" />
+						<textbox id="l-email" preference="pref-email" onchange="Siphon.setLoginInfo( document.getElementById('l-password').value )"
+						onkeypress="if ( event.keyCode == 13 ) { SiphonSettings.onSyncCommand(); return false; }"
+						oninput="Siphon.setLoginInfo( document.getElementById('l-password').value )"/>
+						<button id="forgot-btn" label="Delete Account" oncommand="SiphonSettings.onDeleteAccountCommand( this )"/>
 						<spacer flex="1" />
 					</hbox>
 					<hbox align="center">
 						<label style="width:100px" control="l-password" value="&options.panemain.password;:"/>
-						<textbox id="l-password" type="password" onchange="Siphon.setLoginInfo( this.value )" />
+						<textbox id="l-password" type="password" onchange="Siphon.setLoginInfo( this.value )"
+						onkeypress="if ( event.keyCode == 13 ) { SiphonSettings.onSyncCommand(); return false; }"
+						oninput="Siphon.setLoginInfo( this.value )"/>
+						<button id="forgot-btn" label="&options.panemain.forgot_btn;" oncommand="SiphonSettings.onForgotCommand(this)" />
 						<spacer flex="1" />
 					</hbox>
 				</groupbox>
 
-				<hbox align="center">
-					<button id="show-sign-up-btn" label="Synchronize" oncommand="SiphonSettings.onSyncCommand()" />
-					<button id="forgot-btn" label="&options.panemain.forgot_btn;" oncommand="SiphonSettings.onForgotCommand()" />
-					<button id="forgot-btn" label="Create Account" oncommand="SiphonSettings.onCreateAccountCommand()"/>
-				</hbox>
-				<separator />
 			</vbox>
 
 			<hbox>
@@ -115,16 +121,21 @@
 			<vbox>
 				<groupbox>
 					<hbox align="center">
-						<checkbox preference="pref-hide-status-bar" label="Hide status bar icon when all add-ons are installed"/>
+						<checkbox id="hide-status-bar-cb" preference="pref-hide-status-bar" label="When all add-ons are installed, hide the status bar icon "/>
 						<spacer flex="1" />
 					</hbox>
 					<hbox align="center">
-						<checkbox preference="pref-enable-recommended" label="Enable addon recommendations"/>
+						<checkbox id="enable-recommended-bar-cb" preference="pref-enable-recommended" label="Enable addon recommendations"/>
 						<spacer flex="1" />
 					</hbox>
 				</groupbox>
 			</vbox>
 
+			<separator />
+			<hbox>
+				<button id="sync-btn" label="Save &amp; Synchronize" oncommand="SiphonSettings.onSyncCommand()" />
+				<spacer flex="1" />
+			</hbox>
 		</groupbox>
 	</prefpane>
 	<vbox style="width:580px;overflow:hidden">

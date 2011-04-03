@@ -29,7 +29,7 @@
 <prefwindow
   id="siphon-server-configuration"
   title="&options.title;"
-  buttons="extra1,cancel"
+  buttons="extra1,accept,cancel"
   buttonlabelextra1="Reset To Defaults"
   ondialogextra1="Siphon.resetServerPrefs();"
   onunload="/*Siphon.settingsDialogClosed()*/"

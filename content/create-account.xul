@@ -2,7 +2,7 @@
 <?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
 <?xml-stylesheet href="chrome://siphon/skin/main.css"?>
 
-<!DOCTYPE prefwindow SYSTEM "chrome://siphon/locale/siphon.dtd">
+<!DOCTYPE dialog SYSTEM "chrome://siphon/locale/siphon.dtd">
 
 <!--
 
@@ -26,60 +26,53 @@
 
 -->
 
-<prefwindow
+<dialog
   id="siphon-create-account"
   title="&options.title;"
-  buttons="extra1,cancel"
-  buttonlabelextra1="Signup"
-  ondialogextra1="SiphonSettings.onSignUpCommand()"
+  buttons="accept,cancel"
+  buttonlabelaccept="Signup"
+  ondialogaccept="SiphonSettings.onSignUpCommand();return false"
   onunload="/*Siphon.settingsDialogClosed()*/"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<prefpane id="pane-settings" label="&options.panemain.title;" style="padding-bottom: 0; margin-bottom: 0;">
+	<groupbox style=" overflow: hidden">
 
-		<preferences>
-			<preference id="pref-email" name="extensions.siphon.email" type="string" />
-		</preferences>
+		<hbox>
+			<caption label="Create Account" />
+		</hbox>
 
-		<groupbox style=" overflow: hidden">
-
-			<hbox>
-				<caption label="Create Account" />
-			</hbox>
-
-			<vbox id="signup-vbox" style="height: 130px;">
-				<groupbox>
-					<hbox align="center">
-						<label style="width:100px" control="s-email" value="Email:"/>
-						<textbox id="s-email" onchange="SiphonSettings.onSignUpChange()"
-						oninput="SiphonSettings.onSignUpChange()"/>
-						<hbox id="s-email-validate" class="invalid"></hbox>
-						<spacer flex="1" />
-					</hbox>
-					<hbox align="center">
-						<label style="width:100px" control="s-password" value="Password:"/>
-						<textbox id="s-password" type="password"
-						onchange="SiphonSettings.onSignUpChange()"
-						oninput="SiphonSettings.onSignUpChange()"/>
-						<hbox id="s-password-validate" class="invalid"></hbox>
-						<spacer flex="1" />
-					</hbox>
-					<hbox align="center">
-						<label style="width:100px" control="r-password" value="Retype:"/>
-						<textbox id="r-password" type="password" onchange="SiphonSettings.onSignUpChange()"
-						oninput="SiphonSettings.onSignUpChange()"/>
-						<hbox id="r-password-validate" class="invalid"></hbox>
-						<spacer flex="1" />
-					</hbox>
-				</groupbox>
-
+		<vbox id="signup-vbox" style="height: 130px;">
+			<groupbox>
 				<hbox align="center">
-					<image id="throbber-sign-up" style="display:none;" src="chrome://siphon/content/throbber/throbber.png" />
+					<label style="width:100px" control="s-email" value="Email:"/>
+					<textbox id="s-email" onchange="SiphonSettings.onSignUpChange()"
+					oninput="SiphonSettings.onSignUpChange()"/>
+					<hbox id="s-email-validate" class="invalid"></hbox>
+					<spacer flex="1" />
 				</hbox>
-			</vbox>
+				<hbox align="center">
+					<label style="width:100px" control="s-password" value="Password:"/>
+					<textbox id="s-password" type="password"
+					onchange="SiphonSettings.onSignUpChange()"
+					oninput="SiphonSettings.onSignUpChange()"/>
+					<hbox id="s-password-validate" class="invalid"></hbox>
+					<spacer flex="1" />
+				</hbox>
+				<hbox align="center">
+					<label style="width:100px" control="r-password" value="Retype:"/>
+					<textbox id="r-password" type="password" onchange="SiphonSettings.onSignUpChange()"
+					oninput="SiphonSettings.onSignUpChange()"/>
+					<hbox id="r-password-validate" class="invalid"></hbox>
+					<spacer flex="1" />
+				</hbox>
+			</groupbox>
 
-		</groupbox>
-	</prefpane>
+			<hbox align="center">
+				<image id="throbber-sign-up" style="display:none;" src="chrome://siphon/content/throbber/throbber.png" />
+			</hbox>
+		</vbox>
+
+	</groupbox>
 
 	<script>
 		Components.utils.import("resource://siphon/modules/siphon.js");
@@ -93,5 +86,5 @@
 		}, false )
 	</script>
 
-</prefwindow>
+</dialog>
 
