@@ -22,7 +22,7 @@
 var EXPORTED_SYMBOLS = [ "Siphon" ]
 
 Components.utils.import('resource://siphon/modules/console.js')
-console.verbose = true
+console.verbose = false
 console.prefix = 'Siphon: '
 Components.utils.import('resource://siphon/modules/crypt/PGencode.js')
 Components.utils.import("resource://gre/modules/AddonManager.jsm");
@@ -167,7 +167,7 @@ var Siphon = {
 
 			var new_login_info = new this.login_info( this.hostname(), this.prefs.getCharPref( "api_url" ), null,
 			  this.prefs.getCharPref( 'email' ), password, "", "" )
-			console.write(new_login_info.hostname + ', ' + new_login_info.formSubmitURL + ', ' + new_login_info.password )
+
 			if ( new_login_info.hostname == this._login_info.hostname
 			&& new_login_info.formSubmitURL == this._login_info.formSubmitURL && this._login_info.password ) {
 				console.write( 'modify' )
@@ -487,6 +487,7 @@ var Siphon = {
 					break
 				case 3:
 					this.uninstallAddon( guid )
+					console.write( guid + ' uninstall' )
 					//this.em.uninstallItem( guid )
 					//this.deleted_addons[guid] = true
 				case 2:
@@ -555,7 +556,7 @@ var Siphon = {
 				data.crypt_password = doEncrypt( this.prefs.getCharPref('encryption_keyid'), 0,
 												 this.prefs.getCharPref('encryption_pubkey'), data.password )
 				delete data.email
-				delete data.passwd
+				delete data.password
 			} catch ( e ) {
 				console.write( 'Error: ecnryption failed: ' + e )
 				return
