@@ -358,20 +358,20 @@ var Siphon = {
 	},
 
 	deleteAddon: function( guid ) {
-		$this = this
-		if ( this.addon_status[ guid ] == this.STAT_INSTALLED ) {
-			this.uninstallAddon( guid )
-		}
+		this.uninstallAddon( guid )
 		this._synchronize_set()
 	},
 
 	uninstallAddon: function( guid ) {
-		Siphon.deleted_addons[guid] = true
+		this.deleted_addons[guid] = true
+
+		if ( this.addon_status[ guid ] == this.STAT_INSTALLED )
+			AddonManager.getAddonByID( guid, function ( addon ) {
+				addon.uninstall()
+			})
+
 		delete this.addon_status[ guid ]
 		this.prefs.setCharPref( 'addon_status', JSON.stringify( this.addon_status ) )
-		AddonManager.getAddonByID( guid, function ( addon ) {
-			addon.uninstall()
-		})
 	},
 
 	unsetFirstRun: function() {
@@ -517,9 +517,9 @@ var Siphon = {
 		for ( var guid in this.addon_status ) {
 			if ( this.addon_status[ guid ] != this.STAT_INSTALLED_NO_SYNC )
 				data.addons[ guid ] = {
-					id: this.addons[guid].id,
-					name: this.addons[guid].id,
-					version: this.addons[guid].version,
+					id:        this.addons[guid].id,
+					name:      this.addons[guid].name,
+					version:   this.addons[guid].version,
 					updateRDF: this.addons[guid].updateRDF
 				}
 		}
